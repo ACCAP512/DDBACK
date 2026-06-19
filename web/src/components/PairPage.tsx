@@ -5,6 +5,9 @@
 // a graceful "load data first" message.
 
 import type { Estimate } from "../types";
+import type { A21State } from "../a21";
+import { effectiveRecovery, isSubstitution301Pair } from "../a21";
+import type { AssumptionRegistry } from "../assumptions";
 import { money2, prettyDate, provisionLabel } from "../format";
 import { confidenceAction, evidenceSummary, findPair, plainBasis } from "../pair";
 import { ConfidenceBadge, HeadlineBadge } from "./ui";
@@ -14,9 +17,12 @@ interface Props {
   est: Estimate | null;
   id: string;
   onBack: () => void;
+  registry: AssumptionRegistry;
+  a21: A21State;
+  setA21: (s: A21State) => void;
 }
 
-export default function PairPage({ est, id, onBack }: Props) {
+export default function PairPage({ est, id, onBack, registry, a21, setA21 }: Props) {
   const pair = est ? findPair(est, id) : undefined;
 
   if (!est || !pair) {
@@ -42,6 +48,8 @@ export default function PairPage({ est, id, onBack }: Props) {
   const directId = t.match_basis === "direct_identification";
   const act = confidenceAction(pair);
   const ev = evidenceSummary(pair);
+  const eff = effectiveRecovery(pair, a21);
+  const isSub = isSubstitution301Pair(pair);
 
   return (
     <div className="pairpage">
@@ -71,11 +79,17 @@ export default function PairPage({ est, id, onBack }: Props) {
               Line recovery
             </div>
             <div className="dollar pos" style={{ fontSize: 34, fontWeight: 600 }}>
-              {money2(pair.recovery)}
+              {money2(eff)}
             </div>
-            {pair.recovery_low !== pair.recovery && (
+            {isSub && (
               <div className="muted mono" style={{ fontSize: 12.5, marginTop: 4 }}>
-                conservative floor {money2(pair.recovery_low)} — best estimate {money2(pair.recovery)}
+                {a21 === "confirmed" ? (
+                  <>firmed to best estimate {money2(pair.recovery)} · 301 confirmed (A-21)</>
+                ) : a21 === "overridden" ? (
+                  <>capped at conservative floor {money2(pair.recovery_low)} · 301 not claimed (A-21)</>
+                ) : (
+                  <>conservative floor {money2(pair.recovery_low)} — best estimate {money2(pair.recovery)}</>
+                )}
               </div>
             )}
           </div>
@@ -120,7 +134,7 @@ export default function PairPage({ est, id, onBack }: Props) {
       {/* Level 2 */}
       <section className="panel">
         <TraceEconomics pair={pair} />
-        <TraceTabs pair={pair} />
+        <TraceTabs pair={pair} registry={registry} a21={a21} setA21={setA21} />
       </section>
 
       <p className="muted no-print" style={{ fontSize: 12, marginTop: 16 }}>

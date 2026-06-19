@@ -5,9 +5,14 @@
 
 import * as Tabs from "@radix-ui/react-tabs";
 import type { MatchedPair } from "../types";
+import type { A21State } from "../a21";
+import { A21_ID } from "../a21";
+import type { AssumptionRegistry } from "../assumptions";
+import { extractAssumptionId, lookupAssumption, tagMeta } from "../assumptions";
 import { chargeLabel, daysBetween, int, money2, prettyDate } from "../format";
 import { cfrRefCount } from "../cite";
-import { Citation } from "./ui";
+import { Citation, Tip } from "./ui";
+import A21Control from "./A21Control";
 
 /** Per-unit economics + window dates are always-visible context above the tabs. */
 export function TraceEconomics({ pair }: { pair: MatchedPair }) {
@@ -70,7 +75,17 @@ export function TraceEconomics({ pair }: { pair: MatchedPair }) {
   );
 }
 
-export default function TraceTabs({ pair }: { pair: MatchedPair }) {
+export default function TraceTabs({
+  pair,
+  registry,
+  a21,
+  setA21,
+}: {
+  pair: MatchedPair;
+  registry: AssumptionRegistry;
+  a21: A21State;
+  setA21: (s: A21State) => void;
+}) {
   const t = pair.trace;
   const eligible = Object.entries(t.eligible_charges).filter(([, v]) => v !== 0);
   const excluded = Object.entries(t.excluded_charges);
@@ -166,14 +181,20 @@ export default function TraceTabs({ pair }: { pair: MatchedPair }) {
 
       {/* Assumptions + flags */}
       <Tabs.Content value="assumptions" style={{ paddingTop: 18 }}>
-        <div className="assumptions">
-          {t.assumption_ids.map((a, i) => (
-            <span className="achip" key={i}>
-              {a}
-            </span>
-          ))}
-          {!t.assumption_ids.length && <div className="muted">No explicit assumptions.</div>}
-        </div>
+        <AssumptionList ids={t.assumption_ids} registry={registry} />
+
+        {/* the ONE claimant-resolvable assumption gets an inline control */}
+        {hasA21(t.assumption_ids) && (
+          <div style={{ marginTop: 16 }}>
+            <A21Control
+              assumption={registry.get(A21_ID)}
+              state={a21}
+              setState={setA21}
+              variant="inline"
+            />
+          </div>
+        )}
+
         {t.flags.length > 0 && (
           <>
             <div className="th" style={{ marginTop: 18 }}>
@@ -190,6 +211,52 @@ export default function TraceTabs({ pair }: { pair: MatchedPair }) {
         )}
       </Tabs.Content>
     </Tabs.Root>
+  );
+}
+
+function hasA21(ids: string[]): boolean {
+  return ids.some((id) => extractAssumptionId(id) === A21_ID);
+}
+
+/** Tagged assumption chips: each carries a VERIFIED/INFERRED/GUESS badge plus
+ *  the registry title; hover/focus reveals the full summary. Falls back to the
+ *  bare id string when the registry has no entry. */
+function AssumptionList({
+  ids,
+  registry,
+}: {
+  ids: string[];
+  registry: AssumptionRegistry;
+}) {
+  if (!ids.length) return <div className="muted">No explicit assumptions.</div>;
+  return (
+    <div className="assumption-rows">
+      {ids.map((raw, i) => {
+        const entry = lookupAssumption(registry, raw);
+        const canonical = extractAssumptionId(raw);
+        if (!entry) {
+          // no registry match — keep the original chip, untagged
+          return (
+            <span className="achip" key={i}>
+              {raw}
+            </span>
+          );
+        }
+        const meta = tagMeta(entry.tag);
+        return (
+          <Tip key={i} label={entry.summary} mono={false}>
+            <span className="assumption-row">
+              <span className={`tagbadge ${meta.cls}`} title={meta.title}>
+                <span aria-hidden>{meta.glyph}</span>
+                {meta.label}
+              </span>
+              <span className="ar-id mono">{canonical ?? entry.id}</span>
+              <span className="ar-title">{entry.title}</span>
+            </span>
+          </Tip>
+        );
+      })}
+    </div>
   );
 }
 

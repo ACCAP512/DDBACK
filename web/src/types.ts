@@ -28,6 +28,32 @@ export interface HealthResponse {
   config: string;
 }
 
+// ── Assumptions registry (GET /api/assumptions) ──────────────────────────────
+export type AssumptionTag = "VERIFIED" | "INFERRED" | "GUESS";
+
+/** The correctable affordance attached to a claimant-resolvable assumption. */
+export interface AssumptionCorrection {
+  prompt: string;
+  confirm_label: string;
+  confirm_effect: string;
+  override_label: string;
+  override_effect: string;
+}
+
+export interface Assumption {
+  id: string;
+  tag: AssumptionTag;
+  title: string;
+  summary: string;
+  correctable: boolean;
+  correction?: AssumptionCorrection;
+}
+
+export interface AssumptionsResponse {
+  count: number;
+  assumptions: Assumption[];
+}
+
 // ── Estimate ────────────────────────────────────────────────────────────────
 export interface Breakdown {
   key: string;

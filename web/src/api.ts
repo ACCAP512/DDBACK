@@ -3,6 +3,7 @@
 // (see vite.config.ts); in prod, FastAPI serves this build from the same origin.
 
 import type {
+  AssumptionsResponse,
   ClaimsResponse,
   ConfigSummary,
   Estimate,
@@ -64,6 +65,8 @@ export const api = {
   health: () => getJson<HealthResponse>("/health"),
 
   config: () => getJson<ConfigSummary>("/config"),
+
+  assumptions: () => getJson<AssumptionsResponse>("/assumptions"),
 
   sampleEstimate: (scale?: "demo" | string) =>
     postJson<Estimate>(

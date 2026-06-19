@@ -20,6 +20,14 @@ import { useVirtualizer } from "@tanstack/react-virtual";
 import * as Popover from "@radix-ui/react-popover";
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import type { Confidence, Estimate, MatchedPair } from "../types";
+import type { A21State } from "../a21";
+import {
+  effectiveBreakdowns,
+  effectiveHeadline,
+  effectiveRecovery,
+  isSubstitution301Pair,
+} from "../a21";
+import type { AssumptionRegistry } from "../assumptions";
 import { int, money0, money2, moneyAbbrev, moneyCoarse, provisionShort } from "../format";
 import { useStored } from "../storage";
 import { pairId } from "../pair";
@@ -28,6 +36,9 @@ import TraceDrawer from "./TraceDrawer";
 
 interface Props {
   est: Estimate;
+  registry: AssumptionRegistry;
+  a21: A21State;
+  setA21: (s: A21State) => void;
 }
 
 interface Filters {
@@ -55,7 +66,7 @@ interface SavedView {
 type Density = "comfortable" | "compact";
 const PAGE_SIZES = [25, 50, 100];
 
-export default function GlassBox({ est }: Props) {
+export default function GlassBox({ est, registry, a21, setA21 }: Props) {
   const pairs = est.matched_pairs;
 
   // ── view state ────────────────────────────────────────────────────────────
@@ -73,14 +84,15 @@ export default function GlassBox({ est }: Props) {
   // ── filtering (batch — only recomputes when `filters` changes) ────────────
   const filtered = useMemo(() => applyFilters(pairs, filters), [pairs, filters]);
 
-  // headline total (X) is fixed; filtered recovery (Y) reconciles against it
+  // headline total (X) reflects the A-21 resolution; filtered recovery (Y) uses
+  // the same effective basis so the "showing $Y of $X" line keeps reconciling.
   const filteredRecovery = useMemo(
-    () => filtered.reduce((a, p) => a + p.recovery, 0),
-    [filtered],
+    () => filtered.reduce((a, p) => a + effectiveRecovery(p, a21), 0),
+    [filtered, a21],
   );
-  const headlineTotal = est.headline_point;
+  const headlineTotal = effectiveHeadline(est, a21);
 
-  const columns = useMemo<ColumnDef<MatchedPair>[]>(() => makeColumns(), []);
+  const columns = useMemo<ColumnDef<MatchedPair>[]>(() => makeColumns(a21), [a21]);
 
   const table = useReactTable({
     data: filtered,
@@ -152,7 +164,11 @@ export default function GlassBox({ est }: Props) {
 
   return (
     <div className="grid" style={{ gap: 18 }}>
-      <Reconciliation est={est} />
+      <Reconciliation est={est} a21={a21} />
+
+      {a21 !== "range" && (
+        <A21StateNote est={est} a21={a21} setA21={setA21} />
+      )}
 
       <section className="panel flush">
         {/* toolbar */}
@@ -325,6 +341,9 @@ export default function GlassBox({ est }: Props) {
           onNext={() => setSelectedId(pairId(pageOrder[selectedIdx + 1]))}
           hasPrev={selectedIdx > 0}
           hasNext={selectedIdx >= 0 && selectedIdx < pageOrder.length - 1}
+          registry={registry}
+          a21={a21}
+          setA21={setA21}
         />
       )}
     </div>
@@ -344,7 +363,7 @@ function cellClass(meta?: ColMeta): string {
   return c.join(" ");
 }
 
-function makeColumns(): ColumnDef<MatchedPair>[] {
+function makeColumns(a21: A21State): ColumnDef<MatchedPair>[] {
   return [
     {
       id: "import",
@@ -413,25 +432,42 @@ function makeColumns(): ColumnDef<MatchedPair>[] {
     {
       id: "recovery",
       header: "Recovery",
-      accessorFn: (p) => p.recovery,
+      // sort + display follow the A-21-effective basis so the column reconciles
+      accessorFn: (p) => effectiveRecovery(p, a21),
       meta: { num: true, unit: "$" },
       cell: (c) => {
         const p = c.row.original;
         const suppressed = !p.in_headline || p.confidence === "low";
+        const val = effectiveRecovery(p, a21);
+        const confirmedSub =
+          a21 === "confirmed" && p.in_headline && isSubstitution301Pair(p);
         // full precision for firm headline rows; coarse for shaky ones
-        return suppressed ? (
-          <span className="coarse">{moneyCoarse(p.recovery)}</span>
-        ) : (
-          <span className="pos">{money2(p.recovery)}</span>
+        if (suppressed) return <span className="coarse">{moneyCoarse(val)}</span>;
+        return (
+          <span className="pos">
+            {money2(val)}
+            {confirmedSub && (
+              <Tip label="Section 301 confirmed for this substitution pair — floor firmed to the point estimate (A-21).">
+                <span className="conf301" aria-label="Section 301 confirmed">
+                  {" "}
+                  ✓301
+                </span>
+              </Tip>
+            )}
+          </span>
         );
       },
     },
     {
       id: "recovery_low",
-      header: "Range low",
-      accessorFn: (p) => p.recovery_low,
+      header: a21 === "confirmed" ? "Floor (firmed)" : "Range low",
+      accessorFn: (p) => (a21 === "confirmed" ? p.recovery : p.recovery_low),
       meta: { num: true, unit: "$" },
-      cell: (c) => <span className="faint">{money2(c.row.original.recovery_low)}</span>,
+      cell: (c) => {
+        const p = c.row.original;
+        const v = a21 === "confirmed" ? p.recovery : p.recovery_low;
+        return <span className="faint">{money2(v)}</span>;
+      },
     },
     {
       id: "confidence",
@@ -879,13 +915,17 @@ function pageWindow(page: number, count: number): number[] {
   return out;
 }
 
-function Reconciliation({ est }: { est: Estimate }) {
-  const head = est.headline_point;
-  const byProg = est.by_program.reduce((a, b) => a + b.recovery, 0);
-  const byYear = est.by_year.reduce((a, b) => a + b.recovery, 0);
+function Reconciliation({ est, a21 }: { est: Estimate; a21: A21State }) {
+  // Reconcile on the A-21-effective basis: for range/confirmed this is the
+  // server point breakdowns; for overridden, the effective regroupings and
+  // headline all use recovery_low — still exactly four-way equal.
+  const head = effectiveHeadline(est, a21);
+  const { byYear: byYearB, byProgram: byProgB } = effectiveBreakdowns(est, a21);
+  const byProg = byProgB.reduce((a, b) => a + b.recovery, 0);
+  const byYear = byYearB.reduce((a, b) => a + b.recovery, 0);
   const byPairs = est.matched_pairs
     .filter((p) => p.in_headline)
-    .reduce((a, p) => a + p.recovery, 0);
+    .reduce((a, p) => a + effectiveRecovery(p, a21), 0);
 
   const eq = (a: number, b: number) => Math.abs(a - b) < 0.5;
   const ok = eq(head, byProg) && eq(head, byYear) && eq(head, byPairs);
@@ -899,8 +939,43 @@ function Reconciliation({ est }: { est: Estimate }) {
       <Tip label={`${money2(head)} = ${money2(byProg)} = ${money2(byYear)} = ${money2(byPairs)}`}>
         <span className="mono muted" style={{ fontSize: 12 }}>
           {money0(head)} reconciles four ways
+          {a21 === "confirmed" ? " · 301 confirmed" : a21 === "overridden" ? " · floor basis" : ""}
         </span>
       </Tip>
+    </div>
+  );
+}
+
+/** A small status note in the glass box when A-21 has been resolved, with a
+ *  one-click reset back to the conservative range. */
+function A21StateNote({
+  est,
+  a21,
+  setA21,
+}: {
+  est: Estimate;
+  a21: A21State;
+  setA21: (s: A21State) => void;
+}) {
+  const head = effectiveHeadline(est, a21);
+  return (
+    <div className={`a21-note-bar ${a21}`}>
+      <span className="tx">
+        {a21 === "confirmed" ? (
+          <>
+            <b>Section 301 confirmed (A-21).</b> The Recovery column shows the firmed figure;
+            headline {money2(head)}.
+          </>
+        ) : (
+          <>
+            <b>Section 301 overridden (A-21).</b> The Recovery column shows the conservative-floor
+            figure; headline {money2(head)}.
+          </>
+        )}
+      </span>
+      <button className="btn ghost sm" onClick={() => setA21("range")}>
+        Reset to range
+      </button>
     </div>
   );
 }

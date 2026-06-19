@@ -71,6 +71,13 @@ def config() -> dict:
     return cfg.config_summary()
 
 
+@app.get("/api/assumptions")
+def assumptions() -> dict:
+    """The engine's assumption registry (tags + the one user-correctable assumption, A-21)."""
+    from drawback.assumptions import registry_summary
+    return registry_summary()
+
+
 @app.post("/api/estimate/sample")
 def estimate_sample(scale: str = "demo") -> dict:
     """Build an estimate from the committed sample CSVs (or generate if absent)."""

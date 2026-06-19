@@ -741,46 +741,6 @@ a {
   color: var(--ink-2);
 }
 
-/* ── SVG bar chart ────────────────────────────────────────────────────────── */
-.chart {
-  width: 100%;
-}
-.chart .axis {
-  stroke: var(--line);
-  stroke-width: 1;
-}
-.chart .gl {
-  stroke: var(--line);
-  stroke-width: 1;
-  stroke-dasharray: 2 4;
-}
-.chart .bar {
-  fill: url(#barGrad);
-  transition: opacity 0.15s;
-  cursor: pointer;
-}
-.chart .bar.dim {
-  opacity: 0.32;
-}
-.chart .bar-cap {
-  fill: var(--accent-bright);
-}
-.chart .xlab {
-  fill: var(--ink-2);
-  font-size: 11px;
-  font-family: var(--mono);
-}
-.chart .vlab {
-  fill: var(--ink-1);
-  font-size: 11px;
-  font-family: var(--mono);
-}
-.chart .gtxt {
-  fill: var(--ink-3);
-  font-size: 10px;
-  font-family: var(--mono);
-}
-
 /* horizontal split bars (by program / by HTS) */
 .splits {
   display: flex;
@@ -2104,31 +2064,6 @@ table.pairs tbody tr.out td {
   padding: 40px 0;
 }
 
-/* svg tooltip */
-.svgtip {
-  position: fixed;
-  z-index: 70;
-  pointer-events: none;
-  background: var(--bg-1);
-  border: 1px solid var(--line-strong);
-  border-radius: 8px;
-  padding: 8px 11px;
-  font-size: 12px;
-  box-shadow: var(--shadow-pop);
-  transform: translate(-50%, -120%);
-  white-space: nowrap;
-}
-.svgtip .tt {
-  font-family: var(--mono);
-  color: var(--ink);
-  font-size: 12.5px;
-}
-.svgtip .ts {
-  color: var(--ink-3);
-  font-size: 11px;
-  margin-top: 2px;
-}
-
 /* footer */
 .footer {
   border-top: 1px solid var(--line);
@@ -2797,6 +2732,480 @@ table.pairs.tg tbody tr.suppressed td.pos {
   letter-spacing: 0.06em;
 }
 
+/* ══════════════════════════════════════════════════════════════════════════
+   Feature layer — assumption tags, the A-21 correctable control, the
+   uncertainty explorer (quantile dotplot), and the Recharts by-year chart.
+   All colours flow from the existing tokens so both themes track automatically.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+/* assumption tag badges (VERIFIED / INFERRED / GUESS) — colour + glyph + word,
+   never colour-only (WCAG 1.4.1). Each clears 3:1 non-text on its wash. */
+.tagbadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--line-strong);
+  white-space: nowrap;
+  flex: none;
+}
+.tagbadge [aria-hidden] {
+  font-size: 10px;
+  line-height: 1;
+}
+.tagbadge.verified {
+  color: var(--accent);
+  border-color: var(--accent-edge);
+  background: var(--accent-wash);
+}
+.tagbadge.inferred {
+  color: var(--amber);
+  border-color: var(--amber-edge);
+  background: var(--amber-wash);
+}
+.tagbadge.guess {
+  color: var(--warn);
+  border-color: var(--warn-edge);
+  background: var(--warn-wash);
+}
+
+/* tagged assumption rows in the trace Assumptions tab */
+.assumption-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+.assumption-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  padding: 7px 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--panel);
+  cursor: help;
+}
+.assumption-row .ar-id {
+  font-size: 11.5px;
+  color: var(--ink-2);
+  flex: none;
+}
+.assumption-row .ar-title {
+  font-size: 12.5px;
+  color: var(--ink-1);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ── A-21 correctable control ─────────────────────────────────────────────── */
+.a21-card-wrap {
+  border-color: var(--accent-edge);
+}
+.a21 {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.a21.inline {
+  padding: 13px;
+  border: 1px solid var(--accent-edge);
+  border-radius: var(--radius);
+  background: var(--accent-wash);
+  gap: 10px;
+}
+.a21-head {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  flex-wrap: wrap;
+}
+.a21-head .a21-id {
+  font-size: 11.5px;
+  color: var(--ink-2);
+}
+.a21-head .a21-title {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--ink);
+}
+.a21-pill {
+  margin-left: auto;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  font-weight: 600;
+  padding: 3px 9px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--line-strong);
+  white-space: nowrap;
+}
+.a21-pill.firm {
+  color: var(--accent);
+  border-color: var(--accent-edge);
+  background: var(--accent-wash);
+}
+.a21-pill.capped {
+  color: var(--amber);
+  border-color: var(--amber-edge);
+  background: var(--amber-wash);
+}
+.a21-pill.range {
+  color: var(--ink-2);
+}
+.a21-prompt {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--ink-1);
+  max-width: 760px;
+}
+.a21.inline .a21-prompt {
+  font-size: 12.5px;
+}
+.a21-choices {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+.a21-choice {
+  appearance: none;
+  text-align: left;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 13px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--line-strong);
+  background: var(--panel);
+  color: var(--ink-1);
+  font: inherit;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+.a21-choice:hover {
+  border-color: var(--line-strong);
+  background: var(--panel-hi);
+}
+.a21-choice .radio {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 1.5px solid var(--ink-3);
+  display: grid;
+  place-items: center;
+  margin-top: 1px;
+}
+.a21-choice .radio .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: transparent;
+}
+.a21-choice.active .radio {
+  border-color: currentColor;
+}
+.a21-choice.active .radio .dot {
+  background: currentColor;
+}
+.a21-choice .ct {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+.a21-choice .lab {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--ink);
+  line-height: 1.35;
+}
+.a21-choice .eff {
+  font-size: 11px;
+  color: var(--ink-2);
+  line-height: 1.45;
+}
+.a21-choice.confirm.active {
+  border-color: var(--accent-edge);
+  background: var(--accent-wash);
+  color: var(--accent);
+}
+.a21-choice.override.active {
+  border-color: var(--amber-edge);
+  background: var(--amber-wash);
+  color: var(--amber);
+}
+.a21-choice.range.active {
+  border-color: var(--line-strong);
+  background: var(--panel-hi);
+  color: var(--ink-1);
+}
+.a21-note {
+  margin: 0;
+  font-size: 11.5px;
+  color: var(--ink-3);
+  line-height: 1.5;
+}
+.a21-note b {
+  color: var(--ink-2);
+}
+
+/* glass-box A-21 status bar */
+.a21-note-bar {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  padding: 11px 16px;
+  border-radius: var(--radius);
+  border: 1px solid var(--accent-edge);
+  background: var(--accent-wash);
+  font-size: 12.5px;
+}
+.a21-note-bar.overridden {
+  border-color: var(--amber-edge);
+  background: var(--amber-wash);
+}
+.a21-note-bar .tx {
+  color: var(--ink-1);
+  line-height: 1.5;
+}
+.a21-note-bar .tx b {
+  color: var(--ink);
+}
+.a21-note-bar .btn {
+  margin-left: auto;
+}
+.conf301 {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--accent);
+  font-weight: 600;
+}
+
+/* range bar — collapsed (confirmed/overridden) firm state */
+.rangebar.collapsed .track {
+  background: var(--accent-wash);
+}
+.rangebar.collapsed .fill-low {
+  background: linear-gradient(90deg, var(--accent-dim), var(--accent));
+}
+
+/* ── uncertainty explorer (Feature 2) ─────────────────────────────────────── */
+.uxp {
+  padding: 0;
+  overflow: hidden;
+}
+.uxp-toggle {
+  appearance: none;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 18px;
+  background: var(--panel-2);
+  border: 0;
+  color: var(--ink-1);
+  font: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+.uxp-toggle .caret {
+  color: var(--ink-3);
+  font-size: 10px;
+  transition: transform 0.15s;
+}
+.uxp-toggle .caret.open {
+  transform: rotate(90deg);
+}
+.uxp-toggle .t {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--ink-1);
+}
+.uxp-toggle .hint {
+  margin-left: auto;
+  font-size: 11.5px;
+  color: var(--ink-3);
+}
+.uxp-body {
+  padding: 4px 18px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  border-top: 1px solid var(--line);
+}
+.uxp-frame {
+  margin: 14px 0 0;
+  font-size: 12px;
+  line-height: 1.55;
+  color: var(--ink-2);
+  background: var(--panel-hi);
+  border: 1px dashed var(--line-strong);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+}
+.uxp-frame b {
+  color: var(--ink-1);
+}
+.uxp-slider {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+.uxp-slider .sl {
+  font-size: 12.5px;
+  color: var(--ink-1);
+  line-height: 1.5;
+}
+.uxp-slider input[type="range"] {
+  width: 100%;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+.uxp-slider .ends {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+.endbtn {
+  appearance: none;
+  border: 1px solid var(--line-strong);
+  background: var(--panel-hi);
+  color: var(--ink-2);
+  font: inherit;
+  font-size: 11px;
+  font-family: var(--mono);
+  padding: 3px 9px;
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+}
+.endbtn:hover {
+  color: var(--ink);
+  border-color: var(--accent-edge);
+  background: var(--accent-wash);
+}
+.uxp-svg {
+  width: 100%;
+  display: block;
+}
+.uxp-band {
+  fill: var(--accent-glow);
+}
+.uxp-axis {
+  stroke: var(--line-strong);
+  stroke-width: 1;
+}
+.uxp-mean {
+  stroke: var(--ink-2);
+  stroke-width: 1.5;
+  stroke-dasharray: 3 3;
+}
+.uxp-meanlab {
+  fill: var(--ink-3);
+  font-size: 9.5px;
+  font-family: var(--mono);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.uxp-dot {
+  fill: var(--accent-bright);
+  stroke: var(--panel);
+  stroke-width: 1;
+  transition: cx 0.3s cubic-bezier(0.16, 1, 0.3, 1), cy 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.uxp-dot.noanim {
+  transition: none;
+}
+.uxp-tick {
+  fill: var(--ink-2);
+  font-size: 10.5px;
+  font-family: var(--mono);
+}
+.uxp-readout {
+  margin: 0;
+  font-size: 13px;
+  color: var(--ink-1);
+}
+.uxp-readout b {
+  color: var(--accent);
+}
+.uxp-axisnote {
+  margin: 0;
+  font-size: 11px;
+  color: var(--ink-3);
+  line-height: 1.5;
+}
+
+/* filing basis note */
+.filing-basis {
+  padding: 11px 16px;
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  background: var(--panel-2);
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: var(--ink-1);
+  margin-bottom: 20px;
+}
+.filing-basis b {
+  color: var(--ink);
+}
+.filing-basis.warn {
+  border-color: var(--amber-edge);
+  background: var(--amber-wash);
+  color: var(--amber);
+}
+.filing-basis.warn b {
+  color: var(--amber);
+}
+
+/* ── Recharts by-year chart (Feature 3) ───────────────────────────────────── */
+.rchart {
+  /* Recharts injects its own focus outline on the surface; keep ours tidy */
+}
+.rchart .recharts-surface {
+  overflow: visible;
+}
+.rchart text {
+  font-family: var(--mono);
+}
+/* keyboard focus from accessibilityLayer — make it visible on our tokens */
+.rchart .recharts-bar-rectangle:focus,
+.rchart .recharts-surface:focus,
+.rchart svg:focus {
+  outline: 2px solid var(--focus);
+  outline-offset: 1px;
+}
+.rtip {
+  background: var(--bg-1);
+  border: 1px solid var(--line-strong);
+  border-radius: 8px;
+  padding: 8px 11px;
+  box-shadow: var(--shadow-pop);
+  pointer-events: none;
+}
+.rtip .tt {
+  font-family: var(--mono);
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+  font-size: 12.5px;
+  font-weight: 600;
+}
+.rtip .ts {
+  color: var(--ink-3);
+  font-size: 11px;
+  margin-top: 2px;
+}
+
 /* responsive */
 @media (max-width: 1000px) {
   .landing {
@@ -2810,6 +3219,9 @@ table.pairs.tg tbody tr.suppressed td.pos {
   }
   .two {
     grid-template-columns: 1fr !important;
+  }
+  .a21-choices {
+    grid-template-columns: 1fr;
   }
 }
 @media (max-width: 720px) {

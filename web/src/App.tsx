@@ -1,8 +1,10 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import * as Tabs from "@radix-ui/react-tabs";
 import { api } from "./api";
-import type { ConfigSummary, Estimate } from "./types";
+import type { AssumptionsResponse, ConfigSummary, Estimate } from "./types";
 import { int } from "./format";
+import { useA21 } from "./a21";
+import { buildRegistry } from "./assumptions";
 import { useTheme } from "./theme";
 import Banner from "./components/Banner";
 import Footer from "./components/Footer";
@@ -38,6 +40,12 @@ export default function App() {
   // Config drives the persistent banner even before any estimate is loaded.
   const [config, setConfig] = useState<ConfigSummary | null>(null);
 
+  // Assumptions registry (tags + the A-21 correctable copy), fetched once.
+  const [assumptions, setAssumptions] = useState<AssumptionsResponse | null>(null);
+
+  // Global A-21 (Section-301 substitution comparator) resolution, persisted.
+  const [a21, setA21] = useA21();
+
   useEffect(() => {
     let live = true;
     api
@@ -46,10 +54,18 @@ export default function App() {
       .catch(() => {
         /* banner is non-critical; estimate.config also carries it */
       });
+    api
+      .assumptions()
+      .then((a) => live && setAssumptions(a))
+      .catch(() => {
+        /* registry is enhancement-only; chips degrade to bare ids */
+      });
     return () => {
       live = false;
     };
   }, []);
+
+  const registry = useMemo(() => buildRegistry(assumptions), [assumptions]);
 
   // Prefer the estimate's embedded config once loaded (guaranteed in-sync).
   const cfg = estimate?.config ?? config;
@@ -125,7 +141,14 @@ export default function App() {
     <main className="main" id="main">
       <div className="shell">
         {pairRoute ? (
-          <PairPage est={estimate} id={pairRoute} onBack={leavePairPage} />
+          <PairPage
+            est={estimate}
+            id={pairRoute}
+            onBack={leavePairPage}
+            registry={registry}
+            a21={a21}
+            setA21={setA21}
+          />
         ) : !estimate ? (
           <>
             {cfg && <Banner config={cfg} />}
@@ -135,13 +158,18 @@ export default function App() {
           <>
             {cfg && <Banner config={cfg} />}
             <Tabs.Content value="estimate">
-              <EstimateView est={estimate} />
+              <EstimateView
+                est={estimate}
+                registry={registry}
+                a21={a21}
+                setA21={setA21}
+              />
             </Tabs.Content>
             <Tabs.Content value="glassbox">
-              <GlassBox est={estimate} />
+              <GlassBox est={estimate} registry={registry} a21={a21} setA21={setA21} />
             </Tabs.Content>
             <Tabs.Content value="filing">
-              <Filing token={estimate.token} />
+              <Filing token={estimate.token} a21={a21} />
             </Tabs.Content>
           </>
         )}

@@ -20,6 +20,10 @@ const num = new Intl.NumberFormat("en-US");
 /** Whole-dollar currency, e.g. $3,787,134. */
 export const money0 = (n: number): string => usd0.format(n ?? 0);
 
+/** Alias for whole-dollar grouped currency (used by model read-outs where
+ *  trailing cents would be false precision on a simulated/aggregated value). */
+export const money = money0;
+
 /** Cents-precision currency, e.g. $20,934.12. */
 export const money2 = (n: number): string => usd2.format(n ?? 0);
 

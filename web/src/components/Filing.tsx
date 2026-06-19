@@ -6,10 +6,12 @@ import type {
   LifecycleResponse,
   SubmitResponse,
 } from "../types";
+import type { A21State } from "../a21";
 import { money2, prettyDate, provisionLabel } from "../format";
 
 interface Props {
   token: string;
+  a21: A21State;
 }
 
 /**
@@ -17,7 +19,7 @@ interface Props {
  * validation + transmission text, a mock-submit that returns a manifest, and a
  * projected claim lifecycle timeline.
  */
-export default function Filing({ token }: Props) {
+export default function Filing({ token, a21 }: Props) {
   const [claims, setClaims] = useState<ClaimsResponse | null>(null);
   const [life, setLife] = useState<LifecycleResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -93,6 +95,23 @@ export default function Filing({ token }: Props) {
       <div className="ribbon">
         <span className="sim">SIMULATED — NOT CONNECTED TO CBP</span>
         <span className="msg">{claims.banner}</span>
+      </div>
+
+      {/* honest basis line: the server claim is generated on the best-estimate
+          (301-on) basis; if A-21 is overridden, flag the divergence. */}
+      <div className={`filing-basis ${a21 === "overridden" ? "warn" : ""}`}>
+        {a21 === "overridden" ? (
+          <>
+            <b>Basis note.</b> These claims are generated on the <b>best-estimate (Section-301-on)</b>{" "}
+            basis. You overrode A-21 to the conservative floor, so the generated claim above would
+            need to be <b>regenerated</b> to match that lower basis before filing.
+          </>
+        ) : (
+          <>
+            <b>Basis note.</b> These claims are generated on the <b>best-estimate (Section-301-on)</b>{" "}
+            basis (A-21{a21 === "confirmed" ? " confirmed" : " unresolved — headline range"}).
+          </>
+        )}
       </div>
 
       <section>

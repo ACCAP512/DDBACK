@@ -1,12 +1,32 @@
+import { lazy, Suspense } from "react";
 import type { Estimate } from "../types";
+import type { A21State } from "../a21";
+import {
+  A21_ID,
+  effectiveBreakdowns,
+  effectiveHeadline,
+  effectiveLow,
+  headlinePairs,
+  isSubstitution301Pair,
+  speculative301,
+} from "../a21";
+import type { AssumptionRegistry } from "../assumptions";
 import { int, money2, moneyAbbrev, moneyRange, reasonLabel } from "../format";
 import { MoneyTip, Tip } from "./ui";
 import CountUp from "./CountUp";
-import BarChart from "./BarChart";
 import Splits from "./Splits";
+import A21Control from "./A21Control";
+import UncertaintyExplorer from "./UncertaintyExplorer";
+
+// Recharts is heavy (d3 dependencies); load the by-year chart on demand so it
+// stays out of the initial bundle. A themed skeleton holds the slot meanwhile.
+const YearChart = lazy(() => import("./YearChart"));
 
 interface Props {
   est: Estimate;
+  registry: AssumptionRegistry;
+  a21: A21State;
+  setA21: (s: A21State) => void;
 }
 
 // Recoverable-with-work vs not-recoverable-as-is partition of blocked_by_reason.
@@ -20,25 +40,35 @@ const HARD_REASONS = [
   "data_quality",
 ];
 
-export default function EstimateView({ est }: Props) {
-  const s = est.summary;
-  const lowPct = s.headline_point > 0 ? (s.headline_low / s.headline_point) * 100 : 0;
+export default function EstimateView({ est, registry, a21, setA21 }: Props) {
+  // A-21-effective aggregates: identical to the server point basis for
+  // range/confirmed; exact recovery_low regroupings for overridden.
+  const headline = effectiveHeadline(est, a21);
+  const { byYear, byHts, byProgram } = effectiveBreakdowns(est, a21);
 
   return (
     <div className="grid" style={{ gap: 22 }}>
       <DataQualityBanner est={est} />
 
-      <Hero est={est} lowPct={lowPct} />
+      <Hero est={est} a21={a21} />
 
-      <StatTiles est={est} />
+      <A21Card est={est} registry={registry} a21={a21} setA21={setA21} />
+
+      <UncertaintyExplorer est={est} a21={a21} setA21={setA21} />
+
+      <StatTiles est={est} a21={a21} />
 
       <div className="grid two" style={{ gridTemplateColumns: "1.35fr 1fr", gap: 18 }}>
         <section className="panel">
           <div className="panel-head">
             <h3>Recovery by import year</h3>
-            <span className="hint">defensible headline · {est.by_year.length} years</span>
+            <span className="hint">defensible headline · {byYear.length} years</span>
           </div>
-          <BarChart data={est.by_year} height={210} emptyText="No matched recovery yet" />
+          <Suspense
+            fallback={<div className="skel" style={{ height: 210, borderRadius: 10 }} />}
+          >
+            <YearChart data={byYear} height={210} emptyText="No matched recovery yet" />
+          </Suspense>
         </section>
 
         <section className="panel">
@@ -46,16 +76,16 @@ export default function EstimateView({ est }: Props) {
             <h3>By drawback program</h3>
             <span className="hint">19 U.S.C. 1313</span>
           </div>
-          <Splits data={est.by_program} total={s.headline_point} variant="program" />
+          <Splits data={byProgram} total={headline} variant="program" />
         </section>
       </div>
 
       <section className="panel">
         <div className="panel-head">
           <h3>Top HTS by recovery</h3>
-          <span className="hint">{est.by_hts.length} codes · headline</span>
+          <span className="hint">{byHts.length} codes · headline</span>
         </div>
-        <Splits data={est.by_hts.slice(0, 8)} total={s.headline_point} variant="hts" />
+        <Splits data={byHts.slice(0, 8)} total={headline} variant="hts" />
       </section>
 
       <BlockedPanel est={est} />
@@ -70,8 +100,50 @@ export default function EstimateView({ est }: Props) {
   );
 }
 
-function Hero({ est, lowPct }: { est: Estimate; lowPct: number }) {
+/** The prominent A-21 correctable card, sat right by the conservatism callout. */
+function A21Card({
+  est,
+  registry,
+  a21,
+  setA21,
+}: {
+  est: Estimate;
+  registry: AssumptionRegistry;
+  a21: A21State;
+  setA21: (s: A21State) => void;
+}) {
+  // Only meaningful when there's speculative 301 to resolve.
+  const spec = speculative301(est);
+  const subCount = headlinePairs(est).filter(isSubstitution301Pair).length;
+  if (spec < 0.5 || subCount === 0) return null;
+  return (
+    <section className="panel a21-card-wrap">
+      <div className="panel-head">
+        <h3>Resolve the Section-301 assumption</h3>
+        <span className="hint">
+          {A21_ID} · {subCount} substitution pair{subCount === 1 ? "" : "s"} ·{" "}
+          {moneyAbbrev(spec)} in play
+        </span>
+      </div>
+      <A21Control
+        assumption={registry.get(A21_ID)}
+        state={a21}
+        setState={setA21}
+        variant="card"
+      />
+    </section>
+  );
+}
+
+function Hero({ est, a21 }: { est: Estimate; a21: A21State }) {
   const s = est.summary;
+
+  // A-21-effective headline + range endpoints (never exceeds headline_point).
+  const headline = effectiveHeadline(est, a21);
+  const low = effectiveLow(est, a21);
+  const point = est.headline_point; // the engine's best estimate — the ceiling
+  const lowPct = point > 0 ? (low / point) * 100 : 0;
+  const collapsed = a21 !== "range"; // confirmed or overridden → single value
 
   // Conservatism, positively framed: dollars we deliberately left out + the
   // count of flagged items. "left money out to stay safe" reads as a strength.
@@ -96,8 +168,8 @@ function Hero({ est, lowPct }: { est: Estimate; lowPct: number }) {
           <div className="eyebrow" style={{ marginBottom: 8 }}>
             You&apos;re owed approximately
           </div>
-          <Tip label={money2(s.headline_point)}>
-            <CountUp value={s.headline_point} />
+          <Tip label={money2(headline)}>
+            <CountUp value={headline} />
           </Tip>
         </div>
         {s.potential_total > 0 && (
@@ -109,8 +181,14 @@ function Hero({ est, lowPct }: { est: Estimate; lowPct: number }) {
 
       <p className="explain">
         <b>Defensible, proof-backed recovery</b> from {int(s.headline_pair_count)} matched
-        import↔export pairs. The conservative floor excludes speculative Section 301 from the
-        substitution comparator.
+        import↔export pairs.{" "}
+        {a21 === "confirmed" ? (
+          <>The headline is firm — you confirmed substituted exports are Section-301-eligible (A-21).</>
+        ) : a21 === "overridden" ? (
+          <>Headline shown at the conservative floor — substituted exports are not Section-301-eligible (A-21).</>
+        ) : (
+          <>The conservative floor excludes speculative Section 301 from the substitution comparator.</>
+        )}
       </p>
 
       {/* conservatism as the headline feature (positively framed) */}
@@ -128,42 +206,80 @@ function Hero({ est, lowPct }: { est: Estimate; lowPct: number }) {
         </div>
       )}
 
-      <div className="rangebar">
+      <div className={`rangebar ${collapsed ? "collapsed" : ""}`}>
         <div
           className="track"
-          title={`Conservative floor ${money2(est.headline_low)} → best estimate ${money2(est.headline_point)}`}
+          title={
+            collapsed
+              ? `Firm at ${money2(headline)} (A-21 ${a21})`
+              : `Conservative floor ${money2(low)} → best estimate ${money2(point)}`
+          }
         >
-          <div className="fill-low" style={{ width: `${Math.max(2, lowPct)}%` }} />
-          <div
-            className="fill-point"
-            style={{ left: `${Math.max(2, lowPct)}%`, width: `${Math.max(2, 100 - lowPct)}%` }}
-          />
+          {collapsed ? (
+            <div className="fill-low" style={{ width: "100%", borderRadius: 8 }} />
+          ) : (
+            <>
+              <div className="fill-low" style={{ width: `${Math.max(2, lowPct)}%` }} />
+              <div
+                className="fill-point"
+                style={{ left: `${Math.max(2, lowPct)}%`, width: `${Math.max(2, 100 - lowPct)}%` }}
+              />
+            </>
+          )}
         </div>
-        <div className="ticks">
-          <div className="t">
-            <span className="lab">Conservative floor</span>
-            <Tip label={money2(est.headline_low)}>
-              <span className="val">{moneyAbbrev(est.headline_low)}</span>
-            </Tip>
-            <span className="faint" style={{ fontSize: 10.5 }}>
-              what we&apos;d defend in an audit
-            </span>
+        {collapsed ? (
+          <div className="ticks">
+            <div className="t">
+              <span className="lab">{a21 === "confirmed" ? "Firm — 301 confirmed" : "Conservative floor"}</span>
+              <Tip label={money2(headline)}>
+                <span className="val pos">{moneyAbbrev(headline)}</span>
+              </Tip>
+              <span className="faint" style={{ fontSize: 10.5 }}>
+                {a21 === "confirmed"
+                  ? "range collapsed — claimant-resolved"
+                  : "speculative §301 not claimed"}
+              </span>
+            </div>
+            <div className="t right">
+              <span className="lab">Best estimate (301-on)</span>
+              <Tip label={money2(point)}>
+                <span className="val faint">{moneyAbbrev(point)}</span>
+              </Tip>
+              <span className="faint" style={{ fontSize: 10.5 }}>
+                engine ceiling
+              </span>
+            </div>
           </div>
-          <div className="t right">
-            <span className="lab">Best estimate</span>
-            <Tip label={money2(est.headline_point)}>
-              <span className="val pos">{moneyAbbrev(est.headline_point)}</span>
-            </Tip>
-            <span className="faint" style={{ fontSize: 10.5 }}>
-              on current evidence
-            </span>
+        ) : (
+          <div className="ticks">
+            <div className="t">
+              <span className="lab">Conservative floor</span>
+              <Tip label={money2(low)}>
+                <span className="val">{moneyAbbrev(low)}</span>
+              </Tip>
+              <span className="faint" style={{ fontSize: 10.5 }}>
+                what we&apos;d defend in an audit
+              </span>
+            </div>
+            <div className="t right">
+              <span className="lab">Best estimate</span>
+              <Tip label={money2(point)}>
+                <span className="val pos">{moneyAbbrev(point)}</span>
+              </Tip>
+              <span className="faint" style={{ fontSize: 10.5 }}>
+                on current evidence
+              </span>
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       <p className="freq">
         About <b>{firmPer10} of every 10</b> matched line-items are firmly recoverable; the rest are
-        pending review or blocked. Range: {moneyRange(est.headline_low, est.headline_point)}.
+        pending review or blocked.{" "}
+        {collapsed
+          ? `Headline ${money2(headline)} (A-21 ${a21 === "confirmed" ? "confirmed" : "overridden"}).`
+          : <>Range: {moneyRange(low, point)}.</>}
       </p>
 
       <div className="herostats">
@@ -193,25 +309,35 @@ function Hero({ est, lowPct }: { est: Estimate; lowPct: number }) {
   );
 }
 
-function StatTiles({ est }: { est: Estimate }) {
+function StatTiles({ est, a21 }: { est: Estimate; a21: A21State }) {
   const s = est.summary;
+  const headline = effectiveHeadline(est, a21);
+  const low = effectiveLow(est, a21);
   const captureRate =
-    est.eligible_duty_pool > 0 ? (s.headline_point / est.eligible_duty_pool) * 100 : 0;
+    est.eligible_duty_pool > 0 ? (headline / est.eligible_duty_pool) * 100 : 0;
   return (
     <div className="tiles">
       <div className="tile">
         <div className="k">Headline recovery</div>
         <div className="v pos">
-          <MoneyTip value={s.headline_point} abbrev={moneyAbbrev(s.headline_point)} />
+          <MoneyTip value={headline} abbrev={moneyAbbrev(headline)} />
         </div>
-        <div className="sub">defensible, proof-backed</div>
+        <div className="sub">
+          {a21 === "confirmed"
+            ? "firm · 301 confirmed"
+            : a21 === "overridden"
+              ? "conservative floor basis"
+              : "defensible, proof-backed"}
+        </div>
       </div>
       <div className="tile">
-        <div className="k">Conservative floor</div>
+        <div className="k">{a21 === "confirmed" ? "Floor (firmed)" : "Conservative floor"}</div>
         <div className="v">
-          <MoneyTip value={s.headline_low} abbrev={moneyAbbrev(s.headline_low)} />
+          <MoneyTip value={low} abbrev={moneyAbbrev(low)} />
         </div>
-        <div className="sub">excl. speculative §301</div>
+        <div className="sub">
+          {a21 === "confirmed" ? "risen to best estimate" : "excl. speculative §301"}
+        </div>
       </div>
       <div className="tile">
         <div className="k">Pending review</div>

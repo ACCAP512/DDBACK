@@ -1,0 +1,54 @@
+{
+  "simulated": true,
+  "banner": "SIMULATED \u2014 not connected to CBP. Projected dates illustrate timing only.",
+  "filing_date": "2026-06-19",
+  "accelerated_payment": true,
+  "current_state": "accepted",
+  "estimated_amount": 3787133.61,
+  "projected_first_payment": "2026-07-10",
+  "retention_deadline": "2030-06-25",
+  "steps": [
+    {
+      "state": "transmitted",
+      "status": "complete",
+      "on": "2026-06-19",
+      "note": "Claim transmitted via ABI/ACE (application id DE)."
+    },
+    {
+      "state": "accepted",
+      "status": "complete",
+      "on": "2026-06-19",
+      "note": "ACE returned an immediate accept."
+    },
+    {
+      "state": "complete",
+      "status": "projected",
+      "on": "2026-06-20",
+      "note": "Supporting docs (CBP 7553 / 349 / 350) uploaded to DIS within 24h."
+    },
+    {
+      "state": "accelerated_payment_paid",
+      "status": "projected",
+      "on": "2026-07-10",
+      "note": "Estimated drawback paid ~3 weeks after AP acceptance (\u2248 $3,787,133.61), secured by a 1A bond (19 CFR 190.92). Provisional until liquidation."
+    },
+    {
+      "state": "under_review",
+      "status": "projected",
+      "on": "2026-06-22",
+      "note": "CBP verification (19 CFR Part 190 Subpart F); liquidation typically 1\u20133 years."
+    },
+    {
+      "state": "liquidated",
+      "status": "projected",
+      "on": "2027-06-25",
+      "note": "Final computation; ACE liquidates weekly on Fridays. Starts the 3-yr record clock."
+    },
+    {
+      "state": "ap_true_up",
+      "status": "projected",
+      "on": "2027-06-25",
+      "note": "AP trued up at liquidation \u2014 repay any excess over the liquidated amount."
+    }
+  ]
+}

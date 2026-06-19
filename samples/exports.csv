@@ -1,0 +1,162 @@
+reference,hts10,description,export_date,quantity,uom,value_per_unit,action,destination_country,has_export_proof,proof_kind,recovered_value_per_unit,direct_id_entry,direct_id_line
+INV-90053,9030890085,"Instruments for measuring electrical quantities, other",2026-01-15,1200,No.,20.90,export,DE,Y,bill_of_lading,0,,
+INV-90013,8538900064,"Parts for switching/protecting electrical circuits, other",2026-01-23,150,No.,456.00,export,DE,Y,bill_of_lading,0,,
+INV-90143,8409910083,Parts for spark-ignition internal combustion engines,2026-01-28,1200,No.,18.70,export,MX,N,none,0,,
+INV-90111,8537100057,"Boards/panels for electric control, <= 1,000 V",2025-09-24,400,No.,408.00,export,JP,Y,bill_of_lading,0,APX-0002161,1
+INV-90075,8538903095,Printed circuit assemblies for switchgear,2024-03-07,600,No.,275.00,export,GB,Y,bill_of_lading,0,APX-0002108,1
+INV-90157,7326908635,"Other articles of iron or steel, other",2026-02-19,600,No.,120,export,US,Y,bill_of_lading,0,,
+INV-90047,8529900033,"Parts for transmission/reception apparatus, other",2026-01-13,160,No.,66.00,export,JP,Y,bill_of_lading,0,APX-0002068,1
+INV-90054,8482990003,Parts of ball or roller bearings,2024-11-22,1200,No.,765.00,export,DE,Y,bill_of_lading,0,,
+INV-90038,7604290092,"Aluminum bars, rods and profiles, other",2024-12-11,400,No.,112.50,export,MX,N,none,0,APX-0002056,1
+INV-90039,9403200037,Other metal furniture,2025-05-02,250,No.,29.75,export,MX,Y,bill_of_lading,0,APX-0002058,1
+INV-90118,8483300042,Bearing housings; plain shaft bearings,2023-05-22,100,No.,175.00,export,CA,Y,bill_of_lading,0,APX-0002170,1
+INV-90072,8481900004,"Parts of taps, cocks, valves and similar appliances",2026-05-12,160,No.,66.00,export,JP,Y,bill_of_lading,0,,
+INV-90156,8505110053,"Permanent magnets, of metal",2025-06-12,250,No.,16.50,export,CA,N,none,0,,
+INV-90006,8528590059,"Monitors, other (not incorporating TV reception apparatus)",2026-06-23,1500,No.,51.00,export,GB,Y,bill_of_lading,0,,
+INV-90109,8504409516,"Static converters (power supplies), other",2026-04-08,20,No.,76.50,export,JP,Y,bill_of_lading,0,APX-0002159,1
+INV-90155,8504409580,"Static converters (power supplies), other",2023-10-17,160,No.,22.00,export,GB,Y,bill_of_lading,0,APX-0002218,1
+INV-90103,8482990015,Parts of ball or roller bearings,2024-10-30,1000,No.,76.50,export,MX,Y,bill_of_lading,0,APX-0002147,1
+INV-90131,8536904009,"Terminals, electrical connectors",2026-06-01,600,No.,765.00,export,MX,Y,bill_of_lading,0,,
+INV-90113,8504404054,Static converters: rectifiers and rectifying apparatus,2024-12-17,80,No.,209.00,export,DE,Y,bill_of_lading,0,,
+INV-90073,7604290029,"Aluminum bars, rods and profiles, other",2026-03-28,360,No.,1125.00,export,JP,Y,bill_of_lading,0,APX-0002106,1
+INV-90049,8471300117,Portable automatic data processing machines (laptops),2024-10-30,250,No.,38.50,export,DE,Y,bill_of_lading,0,APX-0002070,1
+INV-90077,8537100044,"Boards/panels for electric control, <= 1,000 V",2025-10-04,600,No.,76.50,export,DE,N,none,0,,
+INV-90160,6109100010,Cotton T-shirts (no import),2025-12-01,500,No.,6,export,US,Y,bill_of_lading,0,,
+INV-90089,9032890095,"Automatic regulating/controlling instruments, other",2026-03-16,2500,No.,154.00,export,DE,Y,bill_of_lading,0,APX-0002126,1
+INV-90065,8528720024,"Reception apparatus for television, color",2023-06-17,240,No.,275.00,export,DE,Y,bill_of_lading,0,,
+INV-90112,8536509093,"Switches for a voltage not exceeding 1,000 V, other",2024-09-27,240,No.,220.00,export,CA,Y,bill_of_lading,0,,
+INV-90026,8504404016,Static converters: rectifiers and rectifying apparatus,2023-02-20,480,No.,220.00,export,GB,Y,bill_of_lading,0,APX-0002038,1
+INV-90081,9403200062,Other metal furniture,2026-06-15,60,No.,6.80,export,DE,Y,bill_of_lading,0,,
+INV-90080,9026100056,Instruments for measuring flow/level of liquids,2023-01-31,40,No.,33.25,export,MX,Y,bill_of_lading,0,,
+INV-90028,9025118083,"Thermometers, not combined with other instruments",2025-10-06,40,No.,408.00,export,CA,N,none,0,,
+INV-90057,8538903077,Printed circuit assemblies for switchgear,2026-05-17,60,No.,18.70,export,MX,Y,bill_of_lading,0,,
+INV-90149,8504408547,Static converters: speed drive controllers for motors,2026-02-07,2500,No.,209.00,export,GB,Y,bill_of_lading,0,,
+INV-90010,8473301180,"Parts and accessories of ADP machines, printed circuit assemblies",2024-07-22,200,No.,119.00,export,DE,Y,bill_of_lading,0,APX-0002014,1
+INV-90025,8504404015,Static converters: rectifiers and rectifying apparatus,2024-08-09,160,No.,1125.00,export,GB,N,none,0,APX-0002036,1
+INV-90050,8517690052,Other apparatus for transmission/reception of voice/data,2023-11-20,1000,No.,456.00,export,DE,Y,bill_of_lading,0,,
+INV-90096,7604290030,"Aluminum bars, rods and profiles, other",2023-02-01,2500,No.,1125.00,export,MX,Y,bill_of_lading,0,,
+INV-90086,8481900092,"Parts of taps, cocks, valves and similar appliances",2024-07-26,240,No.,1125.00,export,JP,Y,bill_of_lading,0,,
+INV-90110,8528720033,"Reception apparatus for television, color",2026-01-25,20,No.,20.90,export,GB,Y,bill_of_lading,0,APX-0002160,1
+INV-90060,8534000096,Printed circuits,2026-03-04,1000,No.,1125.00,export,CA,Y,bill_of_lading,0,APX-0002088,1
+INV-90003,8528590089,"Monitors, other (not incorporating TV reception apparatus)",2023-03-26,1200,No.,76.50,export,MX,Y,bill_of_lading,0,APX-0002003,1
+INV-90001,9026100014,Instruments for measuring flow/level of liquids,2024-06-26,20,No.,66.00,export,GB,Y,bill_of_lading,0,APX-0002000,1
+INV-90092,7604290068,"Aluminum bars, rods and profiles, other",2025-12-31,1500,No.,112.50,export,MX,Y,bill_of_lading,0,APX-0002130,1
+INV-90091,8529900012,"Parts for transmission/reception apparatus, other",2025-08-25,2500,No.,7.60,export,DE,Y,bill_of_lading,0,APX-0002128,1
+INV-90087,8529900068,"Parts for transmission/reception apparatus, other",2024-02-12,2000,No.,90.00,export,JP,Y,bill_of_lading,0,,
+INV-90044,9403200049,Other metal furniture,2023-03-15,2000,No.,154.00,export,GB,Y,bill_of_lading,0,,
+INV-90125,8471800027,Other units of automatic data processing machines,2025-01-06,1500,No.,154.00,export,GB,Y,bill_of_lading,0,APX-0002177,1
+INV-90007,3919900040,"Self-adhesive plates/film of plastics, other",2024-09-03,320,No.,187.00,export,DE,Y,bill_of_lading,0,,
+INV-90063,7616995154,"Articles of aluminum, other",2026-04-12,600,No.,99.00,export,GB,Y,bill_of_lading,0,APX-0002093,1
+INV-90145,8471800011,Other units of automatic data processing machines,2025-05-18,900,No.,528.00,export,MX,Y,bill_of_lading,0,APX-0002203,1
+INV-90114,3919900041,"Self-adhesive plates/film of plastics, other",2025-06-27,900,No.,990.00,export,DE,Y,bill_of_lading,0,,
+INV-90115,8517620089,"Machines for reception/conversion of voice, images or data (networking)",2025-03-09,60,No.,600.00,export,CA,Y,bill_of_lading,0,,
+INV-90061,9403200035,Other metal furniture,2026-04-02,30,No.,528.00,export,GB,Y,bill_of_lading,0,,
+INV-90058,8517620089,"Machines for reception/conversion of voice, images or data (networking)",2025-11-26,600,No.,990.00,export,CA,Y,bill_of_lading,0,APX-0002083,1
+INV-90151,7616995103,"Articles of aluminum, other",2025-06-28,1500,No.,10.00,export,MX,Y,bill_of_lading,0,APX-0002212,1
+INV-90024,8525890089,"Television cameras, digital cameras, other",2022-09-15,2000,No.,27.50,export,MX,Y,bill_of_lading,0,,
+INV-90033,8504409522,"Static converters (power supplies), other",2026-02-21,800,No.,175.00,export,CA,Y,bill_of_lading,0,APX-0002049,1
+INV-90030,9403200019,Other metal furniture,2025-07-17,40,No.,85.50,export,GB,Y,bill_of_lading,0,,
+INV-90097,8538900085,"Parts for switching/protecting electrical circuits, other",2026-03-30,40,No.,242.00,export,GB,Y,bill_of_lading,0,,
+INV-90139,8538903064,Printed circuit assemblies for switchgear,2025-06-23,1500,No.,275.00,export,CA,N,none,0,,
+INV-90041,8528590084,"Monitors, other (not incorporating TV reception apparatus)",2024-03-04,40,No.,51.00,export,GB,Y,bill_of_lading,0,APX-0002061,1
+INV-90037,8517620076,"Machines for reception/conversion of voice, images or data (networking)",2025-08-12,900,No.,112.50,export,DE,N,none,0,APX-0002054,1
+INV-90046,9025118092,"Thermometers, not combined with other instruments",2026-01-31,600,No.,480.00,export,JP,Y,bill_of_lading,0,,
+INV-90071,9025118094,"Thermometers, not combined with other instruments",2025-08-06,80,No.,43.75,export,MX,Y,bill_of_lading,0,,
+INV-90101,8531800016,"Electric sound or visual signaling apparatus, other",2024-03-14,80,No.,66.00,export,DE,Y,bill_of_lading,0,,
+INV-90070,3926909757,"Articles of plastics, other (face masks/components)",2026-04-06,2000,No.,75.00,export,DE,Y,bill_of_lading,0,APX-0002102,1
+INV-90158,7326908688,"Other articles of iron or steel, other",2026-03-01,300,No.,120,export,US,Y,bill_of_lading,0,,
+INV-90043,8537100078,"Boards/panels for electric control, <= 1,000 V",2025-02-11,60,No.,242.00,export,JP,N,none,0,,
+INV-90137,8409910035,Parts for spark-ignition internal combustion engines,2025-11-17,50,No.,90.00,export,CA,Y,bill_of_lading,0,,
+INV-90132,8481900014,"Parts of taps, cocks, valves and similar appliances",2026-06-18,1200,No.,6.80,export,DE,Y,bill_of_lading,0,,
+INV-90035,8542310098,Electronic integrated circuits: processors and controllers,2025-06-09,360,No.,112.50,export,MX,Y,bill_of_lading,0,,
+INV-90017,8532250069,"Fixed capacitors, dielectric of paper or plastics",2026-04-24,400,No.,51.00,export,DE,Y,bill_of_lading,0,APX-0002022,1
+INV-90048,8467990056,"Parts of tools for working in the hand, other",2023-01-25,100,No.,57.00,export,CA,Y,bill_of_lading,0,APX-0002069,1
+INV-90022,8471300196,Portable automatic data processing machines (laptops),2023-07-28,160,No.,22.00,export,DE,Y,bill_of_lading,0,APX-0002031,1
+INV-90147,8517620064,"Machines for reception/conversion of voice, images or data (networking)",2026-02-03,30,No.,90.00,export,DE,N,none,0,APX-0002205,1
+INV-90154,8534000053,Printed circuits,2023-11-03,2500,No.,16.50,export,DE,Y,bill_of_lading,0,APX-0002217,1
+INV-90067,8528720006,"Reception apparatus for television, color",2022-11-19,600,No.,242.00,export,GB,Y,bill_of_lading,0,,
+INV-90142,8529900056,"Parts for transmission/reception apparatus, other",2024-10-20,250,No.,76.50,export,CA,Y,bill_of_lading,0,APX-0002198,1
+INV-90064,8544429092,"Insulated electric conductors fitted with connectors, other",2025-03-24,400,No.,90.00,export,GB,N,none,0,,
+INV-90021,7604290083,"Aluminum bars, rods and profiles, other",2025-12-13,60,No.,6.80,export,DE,Y,bill_of_lading,0,APX-0002028,1
+INV-90106,8544429012,"Insulated electric conductors fitted with connectors, other",2024-09-08,320,No.,480.00,export,DE,Y,bill_of_lading,0,APX-0002151,1
+INV-90138,8541490047,"Photosensitive semiconductor devices, other",2025-12-20,360,No.,18.75,export,MX,Y,bill_of_lading,0,,
+INV-90002,8504409571,"Static converters (power supplies), other",2025-04-12,160,No.,408.00,export,CA,Y,bill_of_lading,0,APX-0002002,1
+INV-90133,9405400011,Other electric lamps and lighting fittings,2025-11-03,900,No.,15.00,export,DE,Y,bill_of_lading,0,APX-0002187,1
+INV-90023,8541490021,"Photosensitive semiconductor devices, other",2026-06-19,1500,No.,10.00,export,CA,Y,bill_of_lading,0,APX-0002032,1
+INV-90085,9013809008,"Liquid crystal devices, other optical appliances",2024-03-15,240,No.,119.00,export,MX,Y,bill_of_lading,0,APX-0002122,1
+INV-90146,9030890098,"Instruments for measuring electrical quantities, other",2024-05-16,2500,No.,29.75,export,CA,Y,bill_of_lading,0,,
+INV-90095,8536509041,"Switches for a voltage not exceeding 1,000 V, other",2024-10-19,30,No.,60.00,export,MX,N,none,0,,
+INV-90078,8517690088,Other apparatus for transmission/reception of voice/data,2025-02-21,2500,No.,57.00,export,DE,Y,bill_of_lading,0,,
+INV-90120,8473301184,"Parts and accessories of ADP machines, printed circuit assemblies",2026-04-19,2000,No.,35.00,export,CA,N,none,0,,
+INV-90059,8525890093,"Television cameras, digital cameras, other",2026-05-15,600,No.,85.50,export,GB,Y,bill_of_lading,0,,
+INV-90015,8534000007,Printed circuits,2026-05-13,400,No.,900.00,export,MX,N,none,0,APX-0002020,1
+INV-90105,9032890078,"Automatic regulating/controlling instruments, other",2026-05-03,400,No.,16.50,export,DE,Y,bill_of_lading,0,APX-0002149,1
+INV-90012,9030890014,"Instruments for measuring electrical quantities, other",2023-05-08,600,No.,119.00,export,GB,Y,bill_of_lading,0,APX-0002016,1
+INV-90032,8483300052,Bearing housings; plain shaft bearings,2026-05-17,200,No.,35.00,export,DE,Y,bill_of_lading,0,,
+INV-90008,8538900017,"Parts for switching/protecting electrical circuits, other",2024-11-23,400,No.,456.00,export,JP,Y,bill_of_lading,0,,
+INV-90031,8409910046,Parts for spark-ignition internal combustion engines,2022-12-27,20,No.,99.00,export,GB,Y,bill_of_lading,0,APX-0002047,1
+INV-90144,3926909782,"Articles of plastics, other (face masks/components)",2025-08-10,600,No.,27.50,export,DE,Y,bill_of_lading,0,APX-0002202,1
+INV-90135,8542310022,Electronic integrated circuits: processors and controllers,2026-04-06,1000,No.,220.00,export,JP,Y,bill_of_lading,0,,
+INV-90126,9032890099,"Automatic regulating/controlling instruments, other",2025-11-02,60,No.,8.80,export,CA,Y,bill_of_lading,0,,
+INV-90116,8517690043,Other apparatus for transmission/reception of voice/data,2025-03-01,1000,No.,175.00,export,DE,Y,bill_of_lading,0,,
+INV-90009,8504404046,Static converters: rectifiers and rectifying apparatus,2025-10-26,160,No.,24.20,export,MX,Y,bill_of_lading,0,APX-0002013,1
+INV-90083,8544429082,"Insulated electric conductors fitted with connectors, other",2026-06-18,150,No.,187.00,export,JP,Y,bill_of_lading,0,APX-0002120,1
+INV-90088,9032890024,"Automatic regulating/controlling instruments, other",2024-08-12,320,No.,765.00,export,MX,Y,bill_of_lading,0,,
+INV-90084,8537100031,"Boards/panels for electric control, <= 1,000 V",2023-01-31,1000,No.,456.00,export,DE,Y,bill_of_lading,0,APX-0002121,1
+INV-90098,8507600038,Lithium-ion accumulators (batteries),2026-02-05,1500,No.,51.00,export,GB,Y,bill_of_lading,0,,
+INV-90123,9403200097,Other metal furniture,2023-05-14,600,No.,112.50,export,JP,Y,bill_of_lading,0,,
+INV-90161,6109100010,Cotton T-shirts (no import),2025-12-01,500,No.,6,export,US,Y,bill_of_lading,0,,
+INV-90051,3926909798,"Articles of plastics, other (face masks/components)",2024-01-11,40,No.,990.00,export,GB,Y,bill_of_lading,0,,
+INV-90042,8534000086,Printed circuits,2025-08-24,480,No.,33.25,export,CA,Y,bill_of_lading,0,,
+INV-90141,8529900013,"Parts for transmission/reception apparatus, other",2025-01-11,800,No.,14.25,export,CA,Y,bill_of_lading,0,,
+INV-90119,8531800006,"Electric sound or visual signaling apparatus, other",2024-10-21,360,No.,855.00,export,CA,Y,bill_of_lading,0,,
+INV-90104,9026100047,Instruments for measuring flow/level of liquids,2023-08-14,60,No.,33.25,export,JP,Y,bill_of_lading,0,,
+INV-90027,8536904079,"Terminals, electrical connectors",2025-08-30,80,No.,18.75,export,JP,Y,bill_of_lading,0,APX-0002039,1
+INV-90066,8538903036,Printed circuit assemblies for switchgear,2024-10-30,40,No.,29.75,export,GB,N,none,0,APX-0002096,1
+INV-90117,8471300155,Portable automatic data processing machines (laptops),2026-02-08,80,No.,99.00,export,DE,Y,bill_of_lading,0,APX-0002169,1
+INV-90040,8528720078,"Reception apparatus for television, color",2024-03-15,480,No.,154.00,export,GB,Y,bill_of_lading,0,,
+INV-90124,7307990051,"Tube or pipe fittings of iron or steel, other",2025-04-25,100,No.,20.90,export,MX,Y,bill_of_lading,0,APX-0002176,1
+INV-90036,9030890003,"Instruments for measuring electrical quantities, other",2024-09-20,100,No.,60.00,export,DE,N,none,0,,
+INV-90020,9013809092,"Liquid crystal devices, other optical appliances",2025-07-17,2000,No.,33.25,export,CA,Y,bill_of_lading,0,,
+INV-90079,8536509058,"Switches for a voltage not exceeding 1,000 V, other",2024-11-07,100,No.,99.00,export,JP,Y,bill_of_lading,0,APX-0002115,1
+INV-90122,9025118086,"Thermometers, not combined with other instruments",2026-05-05,20,No.,1125.00,export,CA,Y,bill_of_lading,0,,
+INV-90069,8534000015,Printed circuits,2025-05-27,900,No.,1125.00,export,GB,Y,bill_of_lading,0,,
+INV-90148,8529900078,"Parts for transmission/reception apparatus, other",2025-08-01,480,No.,242.00,export,GB,Y,bill_of_lading,0,,
+INV-90134,8504404039,Static converters: rectifiers and rectifying apparatus,2025-04-23,400,No.,43.75,export,JP,Y,bill_of_lading,0,,
+INV-90052,3926909753,"Articles of plastics, other (face masks/components)",2025-07-29,320,No.,242.00,export,JP,Y,bill_of_lading,0,APX-0002073,1
+INV-90090,8473301163,"Parts and accessories of ADP machines, printed circuit assemblies",2025-09-10,40,No.,24.20,export,MX,Y,bill_of_lading,0,APX-0002127,1
+INV-90055,8536509096,"Switches for a voltage not exceeding 1,000 V, other",2026-01-17,40,No.,29.75,export,GB,Y,bill_of_lading,0,APX-0002079,1
+INV-90107,8504404035,Static converters: rectifiers and rectifying apparatus,2026-06-06,160,No.,14.25,export,GB,Y,bill_of_lading,0,APX-0002155,1
+INV-90129,8471800085,Other units of automatic data processing machines,2024-05-23,360,No.,8.00,export,DE,Y,bill_of_lading,0,APX-0002181,1
+INV-90074,8482990028,Parts of ball or roller bearings,2026-05-17,150,No.,66.00,export,CA,Y,bill_of_lading,0,APX-0002107,1
+INV-90130,8504407095,Static converters: power supplies for ADP machines,2023-10-04,1200,No.,22.00,export,CA,Y,bill_of_lading,0,,
+INV-90102,8482990046,Parts of ball or roller bearings,2023-04-25,480,No.,20.90,export,JP,Y,bill_of_lading,0,,
+INV-90016,9013809016,"Liquid crystal devices, other optical appliances",2023-08-12,2500,No.,480.00,export,MX,N,none,0,APX-0002021,1
+INV-90011,8471800032,Other units of automatic data processing machines,2025-03-19,50,No.,16.50,export,GB,N,none,0,APX-0002015,1
+INV-90056,9013809060,"Liquid crystal devices, other optical appliances",2026-04-23,60,No.,1125.00,export,GB,Y,bill_of_lading,0,APX-0002080,1
+INV-90068,8505110080,"Permanent magnets, of metal",2023-03-24,20,No.,22.00,export,CA,N,none,0,,
+INV-90150,9405400070,Other electric lamps and lighting fittings,2026-02-19,60,No.,408.00,export,GB,N,none,0,APX-0002210,1
+INV-90018,8471800057,Other units of automatic data processing machines,2026-01-28,80,No.,38.50,export,CA,N,none,0,APX-0002023,1
+INV-90005,7616995126,"Articles of aluminum, other",2024-06-17,360,No.,14.25,export,GB,Y,bill_of_lading,0,,
+INV-90152,9405400028,Other electric lamps and lighting fittings,2026-05-04,30,No.,85.50,export,GB,N,none,0,,
+INV-90121,8544429097,"Insulated electric conductors fitted with connectors, other",2025-04-25,600,No.,1125.00,export,CA,N,none,0,,
+INV-90045,8525890028,"Television cameras, digital cameras, other",2025-03-17,250,No.,528.00,export,CA,Y,bill_of_lading,0,,
+INV-90140,8529900073,"Parts for transmission/reception apparatus, other",2025-06-25,320,No.,76.50,export,MX,Y,bill_of_lading,0,APX-0002196,1
+INV-90094,8471300155,Portable automatic data processing machines (laptops),2023-08-19,100,No.,12.75,export,JP,Y,bill_of_lading,0,APX-0002132,1
+INV-90108,8532250008,"Fixed capacitors, dielectric of paper or plastics",2022-07-30,400,No.,900.00,export,MX,Y,bill_of_lading,0,,
+INV-90100,8533210081,"Fixed resistors, for a power handling capacity <= 20 W",2023-12-26,400,No.,855.00,export,JP,Y,bill_of_lading,0,APX-0002141,1
+INV-90034,8467990020,"Parts of tools for working in the hand, other",2025-11-30,60,No.,119.00,export,JP,Y,bill_of_lading,0,APX-0002050,1
+INV-90082,8483300001,Bearing housings; plain shaft bearings,2025-03-02,1500,No.,16.50,export,GB,Y,bill_of_lading,0,,
+INV-90093,8536509079,"Switches for a voltage not exceeding 1,000 V, other",2025-09-21,40,No.,35.00,export,MX,Y,bill_of_lading,0,APX-0002131,1
+INV-90004,8533210012,"Fixed resistors, for a power handling capacity <= 20 W",2024-06-27,1500,No.,57.00,export,DE,Y,bill_of_lading,0,APX-0002007,1
+INV-90136,8505110082,"Permanent magnets, of metal",2022-05-20,400,No.,85.50,export,JP,Y,bill_of_lading,0,,
+INV-90019,8536509042,"Switches for a voltage not exceeding 1,000 V, other",2022-10-01,100,No.,480.00,export,JP,Y,bill_of_lading,0,,
+INV-90153,8531800077,"Electric sound or visual signaling apparatus, other",2025-04-15,1200,No.,16.50,export,JP,Y,bill_of_lading,0,APX-0002216,1
+INV-90128,8471500114,"Processing units (servers), other",2026-02-13,1000,No.,175.00,export,MX,Y,bill_of_lading,0,APX-0002180,1
+INV-90159,6109100010,Cotton T-shirts (no import),2025-12-01,500,No.,6,export,US,Y,bill_of_lading,0,,
+INV-90029,9030890026,"Instruments for measuring electrical quantities, other",2024-11-04,480,No.,600.00,export,DE,Y,bill_of_lading,0,APX-0002043,1
+INV-90099,8541490077,"Photosensitive semiconductor devices, other",2025-05-03,2500,No.,75.00,export,CA,Y,bill_of_lading,0,,
+INV-90127,8471300134,Portable automatic data processing machines (laptops),2025-11-12,1000,No.,140.00,export,GB,Y,bill_of_lading,0,,
+INV-90062,8504404088,Static converters: rectifiers and rectifying apparatus,2025-08-02,160,No.,60.00,export,JP,Y,bill_of_lading,0,,
+INV-90014,8538903025,Printed circuit assemblies for switchgear,2025-07-12,100,No.,90.00,export,CA,Y,bill_of_lading,0,APX-0002018,1
+INV-90076,9031800056,"Measuring/checking instruments, other",2026-07-08,600,No.,18.70,export,CA,Y,bill_of_lading,0,,

@@ -30,13 +30,15 @@ docs/                            RESEARCH, ASSUMPTIONS, DECISIONS, PLAN, PROGRES
 
 ## Milestones
 - **M0 — Repo & scaffolding** ✅ structure, venv, .gitignore, requirements, tracking docs.
-- **M1 — Research gate** ✅ RESEARCH.md (18 Qs cited) + ASSUMPTIONS.md (A-01..A-20 tagged). Engine logic unlocked.
-- **M2 — Data layer** ⏳ canonical models; HTS reference fixture; synthetic generator; CSV parser/validator + data-quality report; hand-verified fixtures.
-- **M3 — Matching engine** ⏳ rules modules (hts/time/computation/eligibility/inventory); MCMF primitive; per-bucket optimizer; traces. Tests: ground-truth + rule + adversarial + property (vs brute force) + reconciliation.
-- **M4 — Layer 1 instant eligibility** ⏳ estimate orchestration; FastAPI; React shell → upload/sample → headline + range + breakdowns (year/HTS/program) + blocked reasons + "what we'd need to file."
-- **M5 — Layer 2 glass box** ⏳ drill-down claim view (headline→year→HTS→pair), reconciliation, evidence manifest, review flags, claim-package export.
-- **M6 — Layer 3 stubbed** ⏳ CATAIR claim file + mock submit (writes + validates) + status dashboard on simulated data; seams marked.
-- **M7 — Hardening & docs** ⏳ full green test pass; README + one-command run + seed data; WALKTHROUGH.md; LIMITATIONS.md.
+- **M1 — Research gate** ✅ RESEARCH.md (18 Qs cited) + ASSUMPTIONS.md (A-01..A-23 tagged). Engine logic unlocked.
+- **M2 — Data layer** ✅ canonical models; HTS reference fixture (~50 codes); synthetic generator; CSV parser/validator + data-quality report; hand-verified fixtures.
+- **M3 — Matching engine** ✅ rules modules (hts/time/computation/eligibility/inventory); exact MCMF primitive (validated vs brute force); two-pass per-bucket optimizer; per-pair traces.
+- **M4 — Layer 1 instant eligibility** ✅ estimate orchestration; FastAPI; React SPA → sample/upload → headline + range + breakdowns (year/HTS/program) + blocked reasons + "what we'd need to file" + data-quality. Verified in-browser.
+- **M5 — Layer 2 glass box** ✅ drill from headline → HTS → pair; reconciliation badge; full trace drawer (citations, numbered derivation, charge breakdown, window, evidence manifest, assumption chips); claim-package export. Verified in-browser.
+- **M6 — Layer 3 stubbed** ✅ CATAIR-shaped claim build/validate; mock submit (writes + validates) + manifest; simulated lifecycle dashboard; all seams marked "SIMULATED". Verified in-browser.
+- **M7 — Hardening & docs** ✅ 59 tests green; README + Makefile one-command run + seed data; WALKTHROUGH.md; LIMITATIONS.md; full in-browser end-to-end verification (no console errors).
+
+**STATUS: build complete.** All seven deliverable layers built, tested, and verified running; every Definition-of-Done item (Section 10) met.
 
 ## Test strategy (PRD §9) — gates "done"
 ground-truth fixtures (hand-computed) · one+ unit test per encoded rule · adversarial (double-claim / out-of-window /

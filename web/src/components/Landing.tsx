@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { ApiError, api } from "../api";
 import type { Estimate } from "../types";
+import ResultsSkeleton from "./ResultsSkeleton";
 
 interface Props {
   onEstimate: (e: Estimate) => void;
@@ -35,6 +36,10 @@ export default function Landing({ onEstimate }: Props) {
   }
 
   const canUpload = !!importsFile && !!exportsFile && !busy;
+
+  // While a request is in flight, show a full-screen results skeleton (not just
+  // a button spinner) so the wait reads as "the dashboard is loading".
+  if (busy) return <ResultsSkeleton />;
 
   return (
     <div className="landing">
@@ -107,14 +112,23 @@ export default function Landing({ onEstimate }: Props) {
             hint="CBP 7501 / ACE entry-summary lines"
             file={importsFile}
             onPick={setImportsFile}
+            template="/template-imports.csv"
           />
           <FileDrop
             label="Exports CSV"
             hint="EEI / AES or bill-of-lading lines"
             file={exportsFile}
             onPick={setExportsFile}
+            template="/template-exports.csv"
           />
         </div>
+
+        <p className="privacy">
+          <LockMini />
+          <span>
+            Processed in your session to compute the estimate — your file isn&apos;t stored.
+          </span>
+        </p>
 
         <div className="actions">
           <button
@@ -143,27 +157,33 @@ function FileDrop({
   hint,
   file,
   onPick,
+  template,
 }: {
   label: string;
   hint: string;
   file: File | null;
   onPick: (f: File | null) => void;
+  template: string;
 }) {
   return (
-    <label className={`drop ${file ? "set" : ""}`}>
-      <input
-        type="file"
-        accept=".csv,text/csv"
-        onChange={(e) => onPick(e.target.files?.[0] ?? null)}
-      />
-      <span className="di">
-        {file ? <CheckIcon /> : <CsvIcon />}
-      </span>
-      <span className="dl">
-        <span className="t">{label}</span>
-        <span className="f">{file ? file.name : hint}</span>
-      </span>
-    </label>
+    <div>
+      <label className={`drop ${file ? "set" : ""}`}>
+        <input
+          type="file"
+          accept=".csv,text/csv"
+          onChange={(e) => onPick(e.target.files?.[0] ?? null)}
+        />
+        <span className="di">{file ? <CheckIcon /> : <CsvIcon />}</span>
+        <span className="dl">
+          <span className="t">{label}</span>
+          <span className="f">{file ? file.name : hint}</span>
+        </span>
+      </label>
+      <a className="droplink" href={template} download>
+        <DownloadIcon />
+        Download example
+      </a>
+    </div>
   );
 }
 
@@ -195,6 +215,22 @@ function CheckIcon() {
   return (
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" aria-hidden>
       <path d="m5 12 5 5 9-11" />
+    </svg>
+  );
+}
+function DownloadIcon() {
+  return (
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
+      <path d="M12 3v12m0 0 4-4m-4 4-4-4" />
+      <path d="M4 19h16" />
+    </svg>
+  );
+}
+function LockMini() {
+  return (
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden>
+      <rect x="4" y="11" width="16" height="9" rx="2" />
+      <path d="M8 11V7a4 4 0 0 1 8 0v4" />
     </svg>
   );
 }

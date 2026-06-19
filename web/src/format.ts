@@ -35,6 +35,49 @@ export function moneyCompact(n: number): string {
   return usd0.format(v);
 }
 
+/**
+ * Two-tier formatting (research §2.2/§4): the hero, summary tiles and chart
+ * labels use this abbreviated form (`$3.79M`, `$1.68M`, `$260K`); the ledger and
+ * trace use full-precision `money2`. Carries 2 significant decimals at M-scale
+ * so a range like `$1.68M–$3.79M` stays honest without false cent-precision.
+ */
+export function moneyAbbrev(n: number): string {
+  const v = n ?? 0;
+  const abs = Math.abs(v);
+  const sign = v < 0 ? "-" : "";
+  if (abs >= 1_000_000) return `${sign}$${(abs / 1_000_000).toFixed(2)}M`;
+  if (abs >= 100_000) return `${sign}$${Math.round(abs / 1_000)}K`;
+  if (abs >= 1_000) return `${sign}$${(abs / 1_000).toFixed(1)}K`;
+  return usd0.format(v);
+}
+
+/** Abbreviated low→high range, e.g. "$1.68M–$3.79M". */
+export function moneyRange(low: number, high: number): string {
+  return `${moneyAbbrev(low)}–${moneyAbbrev(high)}`;
+}
+
+/**
+ * Coarse, value-suppressed figure for shaky (low-confidence / not-in-headline)
+ * rows (research §2.2 VSUP): one significant figure prefixed "~" so the UI
+ * resists over-reading it, e.g. "~$12K", "~$1.7M".
+ */
+export function moneyCoarse(n: number): string {
+  const v = n ?? 0;
+  const abs = Math.abs(v);
+  if (abs < 1) return "$0";
+  const sign = v < 0 ? "-" : "";
+  if (abs >= 1_000_000) return `${sign}~$${(abs / 1_000_000).toFixed(1)}M`;
+  if (abs >= 1_000) {
+    // round to 1 significant figure within the K range
+    const k = abs / 1_000;
+    const mag = Math.pow(10, Math.floor(Math.log10(k)));
+    const rounded = Math.round(k / mag) * mag;
+    return `${sign}~$${rounded}K`;
+  }
+  const mag = Math.pow(10, Math.floor(Math.log10(abs)));
+  return `${sign}~$${Math.round(abs / mag) * mag}`;
+}
+
 /** Friendly long label for a 1313 provision code. */
 export function provisionLabel(code: ProvisionCode): string {
   switch (code) {

@@ -2,6 +2,30 @@
 
 Newest first. Short entries: done / next / blocked.
 
+## 2026-06-19 (UX research + execution)
+- **Done:** Ran 6 parallel primary-source UX/UX-research streams (NN/g, Baymard, WCAG 2.2, Google PAIR,
+  peer-reviewed uncertainty-viz, design-system docs, competitor teardown) → `docs/UX_RESEARCH.md`
+  (validated the build, compared options, recommended the best fit). Then **executed** the prioritized
+  recommendations in `web/` (verified in-browser, both themes, no console errors; clean `npm install &&
+  npm run build` green):
+  - **Theme:** tokenized light/dark; **light is now the default**, dark a persisted toggle (WCAG-tuned both).
+  - **Accessibility:** Radix primitives under the custom CSS (Dialog trace-drawer w/ focus-trap, Tabs nav,
+    Popover/DropdownMenu filters, Tooltip), skip-link, focus-visible rings, prefers-reduced-motion, ≥24px
+    targets, color+icon+label status (WCAG 2.2 AA pass, token-level contrast checked).
+  - **Glass-box table → TanStack:** recovery-sorted, faceted batch filters w/ counts + chips, pagination
+    (persisted), density toggle, virtualization, value-suppressed low-confidence rows, "Headline = Σ …
+    reconciles four ways" badge + "Showing $Y of $X" line, Saved Views.
+  - **Trace:** two-level disclosure (gist + Radix tabs Computation/Citations/Evidence/Assumptions),
+    bound-action confidence, evidence count, prev/next, **live eCFR/Cornell citation links**, and a
+    deep-linkable **`#/pair/<id>` standalone printable page**.
+  - **Conservatism as headline:** "Audit-defensible — we left $X out / flagged N" framing, cliff-effect-safe
+    range labels, frequency framing, two-tier number formatting (abbreviated hero/tiles + tooltip; full
+    precision in ledger/trace).
+  - **Upload/onboarding:** CSV templates + "Download example", dropzone privacy line, row-accounting banner,
+    full-screen results skeleton.
+- **Next:** optional P3 (correctable assumption chips, quantile-dotplot uncertainty viz, Recharts swap) —
+  deferred. **Blocked:** none.
+
 ## 2026-06-19 (build complete)
 - **Done:** M5 frontend (React+TS+Vite SPA) built green and **verified in-browser** end-to-end across all
   three layers: Layer 1 hero ($3.79M point / $1.68M low / +$0.52M pending) + range bar + by-year SVG chart +

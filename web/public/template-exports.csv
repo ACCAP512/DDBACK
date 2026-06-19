@@ -1,0 +1,3 @@
+reference,hts10,description,export_date,quantity,uom,value_per_unit,action,destination_country,has_export_proof,proof_kind,recovered_value_per_unit,direct_id_entry,direct_id_line
+INV-90053,9030890085,"Instruments for measuring electrical quantities, other",2026-01-15,1200,No.,20.90,export,DE,Y,bill_of_lading,0,,
+INV-90143,8409910083,Parts for spark-ignition internal combustion engines,2026-01-28,1200,No.,18.70,export,MX,N,none,0,,

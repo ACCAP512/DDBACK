@@ -1,6 +1,6 @@
 import { useId, useState } from "react";
 import type { Breakdown } from "../types";
-import { int, money2, moneyCompact } from "../format";
+import { int, money2, moneyCompact, moneyAbbrev } from "../format";
 
 interface Props {
   data: Breakdown[];
@@ -59,13 +59,16 @@ export default function BarChart({ data, height = 200, emptyText }: Props) {
         viewBox={`0 0 ${W} ${H}`}
         width="100%"
         role="img"
+        aria-label={`Recovery by category: ${data
+          .map((d) => `${d.label} ${moneyAbbrev(d.recovery)}`)
+          .join(", ")}.`}
         preserveAspectRatio="xMidYMid meet"
         onMouseLeave={() => setTip(null)}
       >
         <defs>
           <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="var(--accent-bright)" stopOpacity="0.95" />
-            <stop offset="100%" stopColor="var(--accent-dim)" stopOpacity="0.55" />
+            <stop offset="0%" stopColor="var(--bar-top)" stopOpacity="1" />
+            <stop offset="100%" stopColor="var(--bar-bot)" stopOpacity="1" />
           </linearGradient>
         </defs>
 

@@ -1,0 +1,13 @@
+# ── Drawback Engine dependencies ───────────────────────────────────────────
+# DESIGN RULE: the core engine (engine/drawback/{models,config,rules,matching})
+# uses the Python STANDARD LIBRARY ONLY. No third-party package may be imported
+# from the rules/matching core, so the legal logic stays auditable and
+# reproducible across machines with zero version drift. Money uses decimal.Decimal.
+#
+# The dependencies below are for the API/app layer and the test runner only.
+
+fastapi==0.111.0
+uvicorn[standard]==0.30.1
+python-multipart==0.0.9   # multipart/form-data for CSV upload
+pytest==8.2.2
+httpx==0.27.0             # FastAPI TestClient transport (test-only)

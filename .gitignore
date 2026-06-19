@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+.pytest_cache/
+.venv/
+venv/
+build/
+dist/
+
+# Node / frontend
+node_modules/
+web/dist/
+*.local
+
+# OS
+.DS_Store
+
+# Generated artifacts (sample data is committed explicitly under samples/)
+*.log
+.mypy_cache/
+.ruff_cache/
+
+# Mock filing transmissions written by the stubbed submit
+filing_out/

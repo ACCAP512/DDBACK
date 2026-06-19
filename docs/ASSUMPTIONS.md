@@ -1,0 +1,43 @@
+# ASSUMPTIONS.md — every legal/technical rule the engine encodes
+
+Each assumption the engine's logic depends on, tagged **[VERIFIED]** (traced to a primary source in
+RESEARCH.md), **[INFERRED]** (defensibly derived from primary sources but not stated verbatim), or
+**[GUESS]** (conservative interpretation where research could not confirm). Per PRD §11, anything not
+confirmable is encoded conservatively and tagged. The engine surfaces the tag in each claim-line trace.
+
+**As-of date: 2026-06-19.** Tariff-eligibility assumptions are date-sensitive (see `config/tariff_eligibility.py`).
+
+| ID | Assumption (as encoded) | Tag | Basis / citation | Conservatism note |
+|----|--------------------------|-----|------------------|-------------------|
+| **A-01** | Substitution eligibility requires the designated import and the substituted (exported) merchandise to share the **same 8-digit HTSUS subheading**. | **[VERIFIED]** | §1313(b)(1), (j)(2); 19 CFR 190.2. RESEARCH Q2. | — |
+| **A-02** | If the designated 8-digit subheading's **article description begins with "other,"** substitution requires the same **10-digit** statistical number, and that 10-digit description must **not** begin with "other"; else no substitution. | **[VERIFIED]** | §1313(j)(5)(A)-(B); 19 CFR 190.2. RESEARCH Q2. | Engine needs an HTS reference giving the "begins-with-other" flag per code; absent data → treat as restrictive (no 8-digit substitution) and flag. |
+| **A-03** | Unused-substitution refund per line = **99% × min(** duties/taxes/fees paid on designated import (per-unit averaged), **,** duties that **the exported article** would owe if imported **)**. | **[VERIFIED]** | 19 CFR 190.32(b)(1); 190.11(a)(2); 190.2. RESEARCH Q3. | — |
+| **A-04** | The "other"→10-digit rule applies to **both** §1313(b) manufacturing and §1313(j)(2) unused substitution. | **[INFERRED]** | Statute ties (j)(5) to (j)(2), but 19 CFR 190.2's shared "Substituted merchandise" definition governs both Subparts B and C. RESEARCH Q2. | Conservative: applying the restriction to (b) can only *reduce* eligibility, never inflate it. |
+| **A-05** | Manufacturing-substitution refund per line = **99% × min(** duties paid on designated import **,** duties the **substituted manufacturing input** would owe if imported **)** — a different comparator from unused. | **[VERIFIED]** | 19 CFR 190.22(a)(1)(ii); 190.11(d). RESEARCH Q3. | Separate code path from A-03; never merged. MVP: rules encoded; BOM matching partial. |
+| **A-06** | Direct-identification (j)(1) refund per line = **99% × duties/taxes/fees paid** on the identified imported units exported/destroyed (no comparator). | **[VERIFIED]** | §1313(j)(1); 19 CFR 190.51(b). RESEARCH Q3. | — |
+| **A-07** | The excise-tax "double drawback" substitution cap (19 CFR 190.22(a)(1)(ii)(C), 190.32(b)(3)) is **NOT applied** (judicially invalidated). | **[VERIFIED]** | *NAM v. Treasury*, Fed. Cir. 2021. RESEARCH Q6/C6. | This *raises* the refund vs. the literal (invalid) reg. Engine flags the line as relying on the post-NAM rule. For MVP, excise taxes are not a primary charge in the electronics persona; logic present, lightly exercised. |
+| **A-08** | 19 CFR 190.14 accounting methods (FIFO/LIFO/low-to-high/average) apply to **direct-identification** claims only; **substitution does not use FIFO tracing** (eligibility is 8-digit HTS + per-unit averaging). | **[VERIFIED]** | 19 CFR 190.14(a),(c). RESEARCH Q7. | Default direct-ID convention = **low-to-high** is *not* assumed; MVP direct-ID uses explicit lot identification. Substitution uses the optimizer within the HTS bucket. |
+| **A-09** | The claim must be filed **within 5 years of the designated import date**; export/destruction must fall after import, before filing, and within that 5-year window; otherwise the line is **out-of-window and excluded** from the headline. | **[VERIFIED]** | §1313(r)(1); 19 CFR 190.51(e)(1); §1313(j)(1)-(2). RESEARCH Q4. | The rare §1313(r) major-disaster / CBP-fault extension is **not** granted by the engine (conservative). |
+| **A-10** | Each exported/destroyed unit is the basis for **at most one** claimed unit, and each imported duty-paid unit's duty is designated **at most once** (quantity conservation). | **[VERIFIED]** | §1313(v); per-unit averaging 19 CFR 190.2. RESEARCH Q6. | This is the hard conservation constraint in the matcher; double-claim attempts are structurally impossible, not merely checked. |
+| **A-11** | Drawback rate is **99%** of each eligible charge for (a)/(b)/(c)/(j) provisions. | **[VERIFIED]** | 19 CFR 190.51(b); 190.22/190.32. RESEARCH Q5. | 100%-provisions (e.g., 1313(d)) out of MVP scope. |
+| **A-12** | Drawback-eligible charges = ordinary customs duty + **Section 301** + **MPF** + **HMF** (+ importation excise). **Excluded:** Section 232, IEEPA, Section 122, AD/CVD. | **[VERIFIED]** | 19 CFR 190.3; 19 U.S.C. 1677h; CSMS #18-000419/#18-000317; SCOTUS 2026-02-20 (IEEPA); CIT 26-47 (§122). RESEARCH Q5/Q18. | **Date-sensitive.** Centralized in `config/tariff_eligibility.py` with as-of 2026-06-19. Default for any unknown charge type = **ineligible** (excluded from headline, surfaced as review-needed). |
+| **A-13** | IEEPA duties are **excluded from drawback** and surfaced only as a separate, clearly-labeled **CAPE** track (not computed as recovery). | **[VERIFIED]** | SCOTUS 2026-02-20; CBP CAPE (2026-04-20). RESEARCH Q5/C7/Q18. | Never added to a drawback total. |
+| **A-14** | A line is eligible only if its import entry is treated as **duty-paid and (assumed) finally liquidated**; synthetic data marks liquidation status; unknown → flag, exclude from headline. | **[INFERRED]** | 19 CFR 190.3(a) ("liquidation has become final"). RESEARCH Q8. | MVP synthetic imports default to liquidated; the seam is explicit. |
+| **A-15** | Export proof is required for an export line to contribute to the **defensible/headline** number; a matched pair lacking export proof is computed but **demoted to "potential, needs review"** and excluded from the headline. | **[VERIFIED]** | 19 CFR 190.51(a)(1), 190.72. RESEARCH Q8. | Core conservatism behavior — visible in Layer-1 "blocked recovery" and Layer-2 evidence manifest. |
+| **A-16** | Money is computed in **`decimal.Decimal`**, quantized to cents at the line level; the 99% and lesser-of are applied before rounding; per-unit duty = entered line duty ÷ HTSUS quantity. | **[INFERRED]** | Per-unit averaging 19 CFR 190.2 (apportion equally over units). | Avoids float error; rounding direction documented in `rules/computation.py`. |
+| **A-17** | The engine is **preparation/decision-support only**; it never represents itself as the filer of record or as giving legal advice; the certification gate (19 CFR 190.6) stays with a human/broker. | **[VERIFIED]** | 19 CFR 190.6; Part 111. RESEARCH Q9/Q12. | Guardrail surfaced in UI + README + every exported claim package. |
+| **A-18** | Recordkeeping / retention and lifecycle timing key off **liquidation date** (3 years from liquidation), not payment. | **[VERIFIED]** | 19 U.S.C. 1508(c)(2); 19 CFR 190.15. RESEARCH Q11/C9. | Simulated lifecycle uses this; AP modeled as pre-liquidation provisional cash. |
+| **A-19** | Substitution may use merchandise "whether imported or domestic"; the **exported** side need not itself be duty-paid. The duty being refunded is always the **designated import's** duty. | **[VERIFIED]** | §1313(j)(2). RESEARCH Q1/Q3. | Prevents the bug of requiring export-side duty. |
+| **A-20** | HTSUS substitution compares the **8-digit prefix** (digits 1–8) of the 10-digit code; statistical suffix (digits 9–10) is ignored for substitution but retained for reporting. | **[VERIFIED]** | USITC HTS structure; §1313(j)(2). RESEARCH Q16. | — |
+
+## Assumptions explicitly deferred / out of MVP scope (documented, not encoded)
+- **§1313(p)** petroleum substitution (own matching rules) — out of scope; would be a wrong answer if (j)(2) logic were reused.
+- **§1313(b)(4)** sought-chemical-elements special substitution — out of scope.
+- Section 232 narrow **derivative-manufacturing** drawback carve-out — **excluded by default** (A-12); enabling it would require live CSMS verification.
+- The §1313(r) **major-disaster** filing extension — not granted (A-09).
+- Pre-2004 entries where **HMF is non-refundable** (C5) — the config records the seam; MVP synthetic data is all current-era.
+
+## How tags surface to the user
+Every claim-line trace emitted by the matcher carries the governing assumption IDs and their tags. Any line whose
+recovery depends on an **[INFERRED]** or **[GUESS]** assumption is flagged at a reduced confidence and, where the PRD's
+conservatism rule applies, excluded from the headline number and shown as "potential — needs review."

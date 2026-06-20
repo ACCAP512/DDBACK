@@ -6,9 +6,12 @@ import type {
   AssumptionsResponse,
   ClaimsResponse,
   ConfigSummary,
+  DefensibilityReport,
   Estimate,
   HealthResponse,
   LifecycleResponse,
+  SignoffRecord,
+  SignoffRequest,
   SubmitResponse,
 } from "./types";
 
@@ -61,6 +64,16 @@ async function postJson<T>(path: string, body?: BodyInit): Promise<T> {
   return unwrap<T>(res);
 }
 
+/** POST a JSON-encoded body (sets Content-Type: application/json). */
+async function postJsonObj<T>(path: string, payload: unknown): Promise<T> {
+  const res = await fetch(`${BASE}${path}`, {
+    method: "POST",
+    headers: { Accept: "application/json", "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  return unwrap<T>(res);
+}
+
 export const api = {
   health: () => getJson<HealthResponse>("/health"),
 
@@ -83,6 +96,16 @@ export const api = {
   claims: (token: string) =>
     getJson<ClaimsResponse>(`/claims/${encodeURIComponent(token)}`),
 
+  /** Per-claim defensibility report (COMPLIANCE §4 P6). */
+  defensibility: (token: string) =>
+    getJson<DefensibilityReport>(`/defensibility/${encodeURIComponent(token)}`),
+
+  /** Record the licensed-filer / self-filer attestation (COMPLIANCE §4 P3).
+   *  Throws ApiError(422, …) when the attestation is invalid. */
+  signoff: (token: string, body: SignoffRequest) =>
+    postJsonObj<SignoffRecord>(`/claims/${encodeURIComponent(token)}/signoff`, body),
+
+  /** Mock-submit. Throws ApiError(428, …) when no sign-off is recorded yet. */
   submit: (token: string) =>
     postJson<SubmitResponse>(`/claims/${encodeURIComponent(token)}/submit`),
 

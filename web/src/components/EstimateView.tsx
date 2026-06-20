@@ -1,5 +1,5 @@
 import { lazy, Suspense } from "react";
-import type { Estimate } from "../types";
+import type { DefensibilityReport, Estimate } from "../types";
 import type { A21State } from "../a21";
 import {
   A21_ID,
@@ -17,6 +17,7 @@ import CountUp from "./CountUp";
 import Splits from "./Splits";
 import A21Control from "./A21Control";
 import UncertaintyExplorer from "./UncertaintyExplorer";
+import Disclaimer from "./Disclaimer";
 
 // Recharts is heavy (d3 dependencies); load the by-year chart on demand so it
 // stays out of the initial bundle. A themed skeleton holds the slot meanwhile.
@@ -24,9 +25,13 @@ const YearChart = lazy(() => import("./YearChart"));
 
 interface Props {
   est: Estimate;
+  /** the per-claim defensibility report (may still be loading → null). */
+  defrep: DefensibilityReport | null;
   registry: AssumptionRegistry;
   a21: A21State;
   setA21: (s: A21State) => void;
+  /** jump to the Defensibility tab (the full audit-ready artifact). */
+  onOpenDefensibility: () => void;
 }
 
 // Recoverable-with-work vs not-recoverable-as-is partition of blocked_by_reason.
@@ -40,7 +45,14 @@ const HARD_REASONS = [
   "data_quality",
 ];
 
-export default function EstimateView({ est, registry, a21, setA21 }: Props) {
+export default function EstimateView({
+  est,
+  defrep,
+  registry,
+  a21,
+  setA21,
+  onOpenDefensibility,
+}: Props) {
   // A-21-effective aggregates: identical to the server point basis for
   // range/confirmed; exact recovery_low regroupings for overridden.
   const headline = effectiveHeadline(est, a21);
@@ -48,15 +60,17 @@ export default function EstimateView({ est, registry, a21, setA21 }: Props) {
 
   return (
     <div className="grid" style={{ gap: 22 }}>
+      <Disclaimer context="estimate" />
+
       <DataQualityBanner est={est} />
 
-      <Hero est={est} a21={a21} />
+      <Hero est={est} defrep={defrep} a21={a21} onOpenDefensibility={onOpenDefensibility} />
 
       <A21Card est={est} registry={registry} a21={a21} setA21={setA21} />
 
       <UncertaintyExplorer est={est} a21={a21} setA21={setA21} />
 
-      <StatTiles est={est} a21={a21} />
+      <StatTiles est={est} defrep={defrep} a21={a21} />
 
       <div className="grid two" style={{ gridTemplateColumns: "1.35fr 1fr", gap: 18 }}>
         <section className="panel">
@@ -135,21 +149,34 @@ function A21Card({
   );
 }
 
-function Hero({ est, a21 }: { est: Estimate; a21: A21State }) {
+function Hero({
+  est,
+  defrep,
+  a21,
+  onOpenDefensibility,
+}: {
+  est: Estimate;
+  defrep: DefensibilityReport | null;
+  a21: A21State;
+  onOpenDefensibility: () => void;
+}) {
   const s = est.summary;
 
   // A-21-effective headline + range endpoints (never exceeds headline_point).
+  // This is the BEST ESTIMATE basis — the upside, subject to review/confirmation.
   const headline = effectiveHeadline(est, a21);
   const low = effectiveLow(est, a21);
   const point = est.headline_point; // the engine's best estimate — the ceiling
   const lowPct = point > 0 ? (low / point) * 100 : 0;
   const collapsed = a21 !== "range"; // confirmed or overridden → single value
 
-  // Conservatism, positively framed: dollars we deliberately left out + the
-  // count of flagged items. "left money out to stay safe" reads as a strength.
-  const hardExcluded = sumReasons(est, HARD_REASONS);
-  const pending = s.potential_total;
-  const excludedTotal = hardExcluded + pending;
+  // The AUDIT-DEFENSIBLE figure: the report's VERIFIED-only headline. We LEAD
+  // with this (COMPLIANCE §4 P1). Fall back to the engine's conservative floor
+  // while the report is still loading so the hero is never blank.
+  const defensible = defrep ? defrep.defensible_headline : est.headline_low;
+  // The real needs-review total from the report (reconciles the callout below).
+  const needsReview = defrep ? defrep.needs_review_total : s.potential_total;
+
   const flaggedCount = est.blocked.length + est.data_quality.issues.length;
 
   // frequency framing: of every 10 matched line-items, how many are firm?
@@ -160,52 +187,63 @@ function Hero({ est, a21 }: { est: Estimate; a21: A21State }) {
     <section className="hero">
       <div className="kicker">
         <span className="pulse" />
-        Instant eligibility · {int(s.headline_pair_count)} defensible matched pairs
+        Estimated potential recovery · {int(s.headline_pair_count)} matched pairs
       </div>
 
+      {/* LEAD with the audit-defensible figure (COMPLIANCE §4 P1). */}
       <div className="headline">
         <div>
           <div className="eyebrow" style={{ marginBottom: 8 }}>
-            You&apos;re owed approximately
+            Audit-defensible recovery
           </div>
-          <Tip label={money2(headline)}>
-            <CountUp value={headline} />
+          <Tip label={money2(defensible)}>
+            <CountUp value={defensible} />
           </Tip>
         </div>
-        {s.potential_total > 0 && (
-          <Tip label={`${money2(s.potential_total)} matched but pending review/proof`}>
-            <span className="pending">+{moneyAbbrev(s.potential_total)} pending review</span>
-          </Tip>
-        )}
+        <Tip label={`${money2(point)} best estimate — the upside, subject to review`}>
+          <span className="pending best">
+            up to {moneyAbbrev(point)} best estimate
+          </span>
+        </Tip>
       </div>
 
       <p className="explain">
-        <b>Defensible, proof-backed recovery</b> from {int(s.headline_pair_count)} matched
-        import↔export pairs.{" "}
+        <b>Rests only on [VERIFIED] legal rules</b> — a licensed filer can stand behind this figure
+        today. The <b>best estimate of {moneyAbbrev(point)}</b> is an{" "}
+        <b>estimate, not a guarantee</b>: it adds upside that is subject to review and confirmation
+        (explore the gap below).{" "}
         {a21 === "confirmed" ? (
-          <>The headline is firm — you confirmed substituted exports are Section-301-eligible (A-21).</>
+          <>You confirmed substituted exports are Section-301-eligible (A-21), firming that upside.</>
         ) : a21 === "overridden" ? (
-          <>Headline shown at the conservative floor — substituted exports are not Section-301-eligible (A-21).</>
+          <>You set substituted exports as not Section-301-eligible (A-21), so that upside is not claimed.</>
         ) : (
-          <>The conservative floor excludes speculative Section 301 from the substitution comparator.</>
+          <>The default range excludes speculative Section 301 from the substitution comparator.</>
         )}
       </p>
 
-      {/* conservatism as the headline feature (positively framed) */}
-      {excludedTotal > 0 && (
-        <div className="conserv">
-          <ShieldIcon />
-          <div className="ctext">
-            <b>Audit-defensible.</b> We left{" "}
-            <Tip label={money2(excludedTotal)}>
-              <span className="dollar">{moneyAbbrev(excludedTotal)}</span>
-            </Tip>{" "}
-            out of this number{flaggedCount > 0 ? <> and flagged <b>{flaggedCount}</b> item{flaggedCount === 1 ? "" : "s"}</> : null}{" "}
-            to keep the headline conservative — only firmly-supported dollars are counted.
-          </div>
+      {/* the audit-defensible vs needs-review reconciliation, tied to the report */}
+      <div className="conserv">
+        <ShieldIcon />
+        <div className="ctext">
+          <b>Audit-defensible.</b> We hold{" "}
+          <Tip label={money2(needsReview)}>
+            <span className="dollar">{moneyAbbrev(needsReview)}</span>
+          </Tip>{" "}
+          out of the defensible figure as <b>needs-review</b>
+          {flaggedCount > 0 ? <> and flagged <b>{flaggedCount}</b> item{flaggedCount === 1 ? "" : "s"}</> : null}{" "}
+          — only [VERIFIED]-rule dollars count toward the figure you can defend today.{" "}
+          <button type="button" className="linklike" onClick={onOpenDefensibility}>
+            See the defensibility report →
+          </button>
         </div>
-      )}
+      </div>
 
+      {/* the best-estimate range bar (the existing low→point explorer). Its
+          purpose is now framed as exploring the upside above the defensible
+          figure — exactly the gap the A-21 control and uncertainty explorer work. */}
+      <div className="rangelabel">
+        Best-estimate range — the upside above the audit-defensible figure
+      </div>
       <div className={`rangebar ${collapsed ? "collapsed" : ""}`}>
         <div
           className="track"
@@ -309,49 +347,56 @@ function Hero({ est, a21 }: { est: Estimate; a21: A21State }) {
   );
 }
 
-function StatTiles({ est, a21 }: { est: Estimate; a21: A21State }) {
-  const s = est.summary;
-  const headline = effectiveHeadline(est, a21);
-  const low = effectiveLow(est, a21);
+function StatTiles({
+  est,
+  defrep,
+  a21,
+}: {
+  est: Estimate;
+  defrep: DefensibilityReport | null;
+  a21: A21State;
+}) {
+  const point = effectiveHeadline(est, a21); // best-estimate basis
+  // Lead the tiles with the audit-defensible figure, mirroring the hero.
+  const defensible = defrep ? defrep.defensible_headline : est.headline_low;
+  const needsReview = defrep ? defrep.needs_review_total : est.summary.potential_total;
   const captureRate =
-    est.eligible_duty_pool > 0 ? (headline / est.eligible_duty_pool) * 100 : 0;
+    est.eligible_duty_pool > 0 ? (defensible / est.eligible_duty_pool) * 100 : 0;
   return (
     <div className="tiles">
       <div className="tile">
-        <div className="k">Headline recovery</div>
+        <div className="k">Audit-defensible</div>
         <div className="v pos">
-          <MoneyTip value={headline} abbrev={moneyAbbrev(headline)} />
+          <MoneyTip value={defensible} abbrev={moneyAbbrev(defensible)} />
+        </div>
+        <div className="sub">[VERIFIED] rules only</div>
+      </div>
+      <div className="tile">
+        <div className="k">Best estimate</div>
+        <div className="v">
+          <MoneyTip value={point} abbrev={moneyAbbrev(point)} />
         </div>
         <div className="sub">
           {a21 === "confirmed"
             ? "firm · 301 confirmed"
             : a21 === "overridden"
-              ? "conservative floor basis"
-              : "defensible, proof-backed"}
+              ? "floor basis · 301 not claimed"
+              : "upside, subject to review"}
         </div>
       </div>
       <div className="tile">
-        <div className="k">{a21 === "confirmed" ? "Floor (firmed)" : "Conservative floor"}</div>
-        <div className="v">
-          <MoneyTip value={low} abbrev={moneyAbbrev(low)} />
-        </div>
-        <div className="sub">
-          {a21 === "confirmed" ? "risen to best estimate" : "excl. speculative §301"}
-        </div>
-      </div>
-      <div className="tile">
-        <div className="k">Pending review</div>
+        <div className="k">Needs review</div>
         <div className="v amberc">
-          <MoneyTip value={s.potential_total} abbrev={moneyAbbrev(s.potential_total)} />
+          <MoneyTip value={needsReview} abbrev={moneyAbbrev(needsReview)} />
         </div>
-        <div className="sub">matched, needs work</div>
+        <div className="sub">confirm before filing</div>
       </div>
       <div className="tile">
-        <div className="k">Capture of duty pool</div>
+        <div className="k">Defensible capture</div>
         <div className="v">{captureRate.toFixed(1)}%</div>
         <div className="sub">
           of <MoneyTip value={est.eligible_duty_pool} abbrev={moneyAbbrev(est.eligible_duty_pool)} />{" "}
-          eligible
+          duty pool
         </div>
       </div>
     </div>
@@ -479,11 +524,6 @@ function BlockedPanel({ est }: { est: Estimate }) {
       </div>
     </section>
   );
-}
-
-function sumReasons(est: Estimate, reasons: string[]): number {
-  const byReason = est.blocked_by_reason ?? {};
-  return reasons.reduce((a, r) => a + (byReason[r] ?? 0), 0);
 }
 
 function defaultDetail(r: string): string {

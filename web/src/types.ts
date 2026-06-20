@@ -47,6 +47,11 @@ export interface Assumption {
   summary: string;
   correctable: boolean;
   correction?: AssumptionCorrection;
+  // Additive fields (GET /api/assumptions now also returns these). Optional so
+  // existing consumers are unaffected.
+  legal?: boolean;
+  upside_only?: boolean;
+  citations?: string[];
 }
 
 export interface AssumptionsResponse {
@@ -228,6 +233,90 @@ export interface SubmitResponse {
   simulated: boolean;
   banner: string;
   claims: SubmitClaimResult[];
+  /** present once a sign-off has been recorded — the attestation travels with
+   *  the (simulated) transmission manifest (COMPLIANCE §4 P3). */
+  signoff?: SignoffRecord;
+}
+
+// ── Defensibility report (GET /api/defensibility/{token}) ────────────────────
+// The per-claim "validate from the trace alone" artifact (COMPLIANCE §4 P6).
+// `tier` mirrors the assumption tags; `contributes_to` says whether a fired rule
+// underpins the audit-defensible headline or only the needs-review upside.
+export type DefensibilityTier = AssumptionTag; // "VERIFIED" | "INFERRED" | "GUESS"
+export type ContributesTo = "defensible" | "review";
+
+export interface DefensibilityReconciliation {
+  ok: boolean;
+  invariant: string;
+  total_claimed: number;
+  duty_paid_on_claimed: number;
+  per_pair_caps_checked: string[];
+  violations: string[];
+}
+
+export interface DefensibilityRule {
+  id: string;
+  title: string;
+  tier: DefensibilityTier;
+  legal: boolean;
+  upside_only: boolean;
+  citations: string[];
+  contributes_to: ContributesTo;
+}
+
+export interface DefensibilityClaimLine {
+  import_entry: string;
+  import_line_no: number;
+  export_reference: string;
+  provision: ProvisionCode;
+  in_headline: boolean;
+  claimed: number;
+  defensible: number;
+  needs_review: number;
+  basis_rules: string[];
+  basis_all_verified: boolean;
+  blocking_rules: string[];
+}
+
+export interface DefensibilityReport {
+  as_of: string;
+  defensible_headline: number;
+  best_estimate: number;
+  needs_review_total: number;
+  headline_basis: string;
+  reconciliation: DefensibilityReconciliation;
+  tier_summary: Record<DefensibilityTier, number>;
+  rules_fired: DefensibilityRule[];
+  claim_lines: DefensibilityClaimLine[];
+  disclaimer: string;
+}
+
+// ── Licensed-filer sign-off (POST /api/claims/{token}/signoff) ───────────────
+// COMPLIANCE §4 P3 — the logged human attestation that gates finalizing a claim.
+export type FilerRole =
+  | "licensed_customs_broker"
+  | "customs_attorney"
+  | "self_filer_own_account";
+
+export interface SignoffRequest {
+  filer_name: string;
+  role: FilerRole;
+  license_number?: string;
+  accepted_defensible: boolean;
+  accepted_review_understood?: boolean;
+}
+
+/** The recorded attestation returned by a successful sign-off (also attached to
+ *  the submit manifest's `signoff` field). */
+export interface SignoffRecord {
+  signed: boolean;
+  filer_name: string;
+  role: FilerRole;
+  license_number: string;
+  attested_on: string;
+  accepted_defensible: boolean;
+  accepted_review_understood: boolean;
+  statement: string;
 }
 
 // ── Lifecycle (Layer 3) ──────────────────────────────────────────────────────

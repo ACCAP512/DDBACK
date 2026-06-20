@@ -3242,12 +3242,656 @@ table.pairs.tg tbody tr.suppressed td.pos {
   }
 }
 
-/* print — used by the standalone pair page (#/pair/<id>). Strip chrome, force
-   a light ink-on-paper rendering regardless of the on-screen theme. */
+/* ══════════════════════════════════════════════════════════════════════════
+   Compliance + defensibility layer — the disclaimer strip, the one-time EULA
+   field-of-use gate, the defensibility report, and the licensed-filer sign-off.
+   All colours flow from the existing tokens so both themes track automatically.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+/* ── conspicuous disclaimer strip (COMPLIANCE §1.5 / P2) ──────────────────── */
+.disclaimer {
+  display: flex;
+  gap: 11px;
+  align-items: flex-start;
+  padding: 11px 15px;
+  border-radius: var(--radius);
+  border: 1px solid var(--line-strong);
+  background: var(--panel-hi);
+}
+.disclaimer .dicon {
+  flex: none;
+  color: var(--ink-2);
+  margin-top: 1px;
+}
+.disclaimer .dtext {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--ink-2);
+}
+.disclaimer .dtext b {
+  color: var(--ink-1);
+  font-weight: 600;
+}
+
+/* ── one-time EULA / field-of-use gate ────────────────────────────────────── */
+.eula-scrim {
+  z-index: 90;
+}
+.eula {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: min(560px, 94vw);
+  max-height: 90vh;
+  overflow: auto;
+  z-index: 91;
+  background: var(--bg-1);
+  border: 1px solid var(--line-strong);
+  border-radius: 16px;
+  box-shadow: var(--shadow-pop);
+  padding: 24px 26px 22px;
+  animation: eulain 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+@keyframes eulain {
+  from {
+    opacity: 0;
+    transform: translate(-50%, calc(-50% + 10px));
+  }
+}
+.eula-head {
+  display: flex;
+  gap: 13px;
+  align-items: flex-start;
+  margin-bottom: 16px;
+}
+.eula-mark {
+  flex: none;
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  color: var(--accent);
+  background: var(--accent-wash);
+  border: 1px solid var(--accent-edge);
+}
+.eula-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+.eula-sub {
+  margin: 4px 0 0;
+  font-size: 12.5px;
+  color: var(--ink-2);
+  line-height: 1.5;
+}
+.eula-disc {
+  margin: 0 0 16px;
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: var(--ink-1);
+  padding: 12px 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--accent);
+  background: var(--panel-2);
+}
+.eula-choices {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.eula-choices-lab {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ink-3);
+  margin-bottom: 2px;
+}
+.eula-choice {
+  appearance: none;
+  text-align: left;
+  display: flex;
+  align-items: flex-start;
+  gap: 11px;
+  padding: 12px 13px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--line-strong);
+  background: var(--panel);
+  color: var(--ink-1);
+  font: inherit;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+.eula-choice:hover {
+  background: var(--panel-hi);
+}
+.eula-choice .radio {
+  flex: none;
+  width: 17px;
+  height: 17px;
+  border-radius: 50%;
+  border: 1.5px solid var(--ink-3);
+  display: grid;
+  place-items: center;
+  margin-top: 1px;
+}
+.eula-choice .radio .dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: transparent;
+}
+.eula-choice.active {
+  border-color: var(--accent-edge);
+  background: var(--accent-wash);
+  color: var(--accent);
+}
+.eula-choice.active .radio {
+  border-color: currentColor;
+}
+.eula-choice.active .radio .dot {
+  background: currentColor;
+}
+.eula-choice .ct {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+.eula-choice .lab {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+  line-height: 1.35;
+}
+.eula-choice.active .lab {
+  color: var(--accent);
+}
+.eula-choice .hint {
+  font-size: 11.5px;
+  color: var(--ink-2);
+  line-height: 1.45;
+}
+.eula-fine {
+  margin: 16px 0 0;
+  font-size: 11px;
+  color: var(--ink-3);
+  line-height: 1.55;
+}
+.eula-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 18px;
+}
+
+/* ── hero additions: lead-with-defensible framing ─────────────────────────── */
+.hero .pending.best {
+  color: var(--accent);
+  border-color: var(--accent-edge);
+  background: var(--accent-wash);
+}
+.linklike {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  font: inherit;
+  font-weight: 600;
+  font-size: inherit;
+  color: var(--accent);
+  cursor: pointer;
+  white-space: nowrap;
+}
+.linklike:hover {
+  text-decoration: underline;
+}
+.rangelabel {
+  margin: 22px 0 -8px;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ink-3);
+}
+
+/* ── defensibility report ─────────────────────────────────────────────────── */
+.defsplit-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+.dcol {
+  padding: 14px 15px;
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  background: var(--panel);
+}
+.dcol .k {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ink-3);
+  margin-bottom: 6px;
+}
+.dcol .v {
+  font-family: var(--mono);
+  font-size: 26px;
+  font-weight: 600;
+  color: var(--ink);
+  letter-spacing: -0.01em;
+}
+.dcol .sub {
+  margin-top: 6px;
+  font-size: 11.5px;
+  color: var(--ink-2);
+  line-height: 1.45;
+}
+.dcol.verified {
+  border-color: var(--accent-edge);
+  background: linear-gradient(180deg, var(--accent-wash), var(--panel));
+}
+.dcol.verified .v {
+  color: var(--accent);
+}
+.dcol.best .v {
+  color: var(--ink);
+}
+.dcol.review {
+  border-color: var(--amber-edge);
+  background: linear-gradient(180deg, var(--amber-wash), var(--panel));
+}
+.dcol.review .v {
+  color: var(--amber);
+}
+.defbar {
+  position: relative;
+  height: 14px;
+  margin-top: 18px;
+  border-radius: var(--radius-pill);
+  background: var(--amber-wash);
+  border: 1px solid var(--line);
+  overflow: hidden;
+}
+.defbar-fill {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  background: linear-gradient(90deg, var(--accent-dim), var(--accent));
+  border-radius: var(--radius-pill) 0 0 var(--radius-pill);
+  transition: width 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.defbar-rest {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  background: repeating-linear-gradient(
+    -45deg,
+    var(--amber-wash),
+    var(--amber-wash) 5px,
+    transparent 5px,
+    transparent 10px
+  );
+}
+.defbar-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 18px;
+  margin-top: 9px;
+  font-size: 12px;
+  color: var(--ink-2);
+}
+.defbar-legend b {
+  color: var(--ink);
+}
+.defbar-legend .sw {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  margin-right: 6px;
+  vertical-align: -1px;
+}
+.defbar-legend .sw.verified {
+  background: var(--accent);
+}
+.defbar-legend .sw.review {
+  background: var(--amber);
+}
+.defbasis {
+  margin: 16px 0 0;
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: var(--ink-2);
+  padding: 11px 13px;
+  border-radius: var(--radius-sm);
+  background: var(--panel-2);
+  border: 1px dashed var(--line-strong);
+}
+
+/* reconciliation (report) */
+.recon.big {
+  font-size: 13.5px;
+  padding: 11px 16px;
+  width: 100%;
+  border-radius: var(--radius);
+}
+.recon.big .ck {
+  font-size: 16px;
+}
+.recon-caps {
+  margin-top: 14px;
+}
+.recon-caps .rc-lab {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ink-3);
+  margin-bottom: 8px;
+}
+.recon-caps ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.recon-caps li {
+  display: flex;
+  align-items: baseline;
+  gap: 9px;
+  font-size: 12px;
+  color: var(--ink-1);
+}
+.recon-caps li .ck {
+  color: var(--accent);
+  font-weight: 700;
+  flex: none;
+}
+.recon-violations {
+  margin-top: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 11px 13px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--warn-edge);
+  background: var(--warn-wash);
+}
+
+/* tier summary + rules table */
+.tier-summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 14px;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--line);
+}
+.ts-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12px;
+  padding: 5px 11px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--line-strong);
+}
+.ts-chip .g {
+  font-size: 11px;
+}
+.ts-chip .n {
+  font-weight: 700;
+  font-size: 13px;
+}
+.ts-chip .l {
+  color: var(--ink-2);
+}
+.ts-chip.verified {
+  color: var(--accent);
+  border-color: var(--accent-edge);
+  background: var(--accent-wash);
+}
+.ts-chip.inferred {
+  color: var(--amber);
+  border-color: var(--amber-edge);
+  background: var(--amber-wash);
+}
+.ts-chip.guess {
+  color: var(--warn);
+  border-color: var(--warn-edge);
+  background: var(--warn-wash);
+}
+.ts-note {
+  font-size: 12px;
+  color: var(--ink-3);
+  margin-left: auto;
+}
+.ts-note b {
+  color: var(--accent);
+}
+.rules-scroll {
+  overflow: auto;
+  max-height: 560px;
+}
+table.pairs.rules-table tbody td {
+  white-space: normal;
+  vertical-align: top;
+}
+table.pairs.rules-table tbody tr {
+  cursor: default;
+}
+table.pairs.rules-table tbody tr:hover {
+  background: transparent;
+}
+table.pairs.rules-table tbody tr.active {
+  background: var(--accent-wash);
+  box-shadow: inset 2px 0 0 var(--accent);
+}
+.rule-cites {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.upside-tag {
+  display: inline-block;
+  margin-left: 7px;
+  font-family: var(--mono);
+  font-size: 9.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--amber);
+  border: 1px solid var(--amber-edge);
+  background: var(--amber-wash);
+  border-radius: var(--radius-pill);
+  padding: 1px 6px;
+  vertical-align: 1px;
+}
+.upside-tag.eng {
+  color: var(--ink-3);
+  border-color: var(--line-strong);
+  background: var(--panel-hi);
+}
+.basis-rules {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+.basis-rules .achip {
+  font-size: 10px;
+  padding: 2px 7px;
+}
+.basis-rules .achip.blocking {
+  color: var(--warn);
+  border-color: var(--warn-edge);
+  background: var(--warn-wash);
+}
+.basis-rules .achip.allok {
+  color: var(--accent);
+  border-color: var(--accent-edge);
+  background: var(--accent-wash);
+}
+.defrep-disc {
+  background: var(--panel-2);
+}
+
+/* ── licensed-filer sign-off form (COMPLIANCE §4 P3) ──────────────────────── */
+.signoff {
+  border-color: var(--accent-edge);
+}
+.signoff.signed {
+  background: linear-gradient(180deg, var(--accent-wash), var(--panel));
+}
+.signoff-intro {
+  margin: 0 0 16px;
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: var(--ink-2);
+  max-width: 760px;
+}
+.signoff-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.sf-grid {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr 1fr;
+  gap: 12px;
+}
+.sf-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.sf-field .input,
+.sf-field .select {
+  width: 100%;
+}
+.sf-check {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--ink-1);
+  cursor: pointer;
+}
+.sf-check input[type="checkbox"] {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  margin-top: 1px;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+.sf-check b {
+  color: var(--ink);
+  font-weight: 600;
+}
+.signoff-recorded {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+}
+.sr-badge {
+  flex: none;
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  color: var(--accent);
+  background: var(--accent-wash);
+  border: 1px solid var(--accent-edge);
+}
+.sr-body {
+  min-width: 0;
+}
+.sr-head {
+  font-size: 14px;
+  color: var(--ink);
+}
+.sr-head b {
+  font-weight: 650;
+}
+.sr-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+  margin: 10px 0;
+}
+.sr-meta .srm {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.sr-meta .srm .k {
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ink-3);
+}
+.sr-meta .srm .v {
+  font-size: 12.5px;
+  color: var(--ink-1);
+}
+.sr-statement {
+  margin: 0;
+  font-size: 12px;
+  font-style: italic;
+  color: var(--ink-2);
+  line-height: 1.55;
+  padding: 10px 13px;
+  border-radius: var(--radius-sm);
+  border-left: 2px solid var(--accent-dim);
+  background: var(--panel-2);
+}
+
+/* certified line on the submit manifest */
+.manifest-signoff {
+  display: flex;
+  align-items: baseline;
+  gap: 9px;
+  font-size: 12.5px;
+  color: var(--ink-1);
+  padding-bottom: 10px;
+  margin-bottom: 4px;
+  border-bottom: 1px solid var(--line);
+}
+.manifest-signoff .ms-ck {
+  color: var(--accent);
+  font-weight: 700;
+}
+.manifest-signoff b {
+  color: var(--ink);
+}
+
+@media (max-width: 1000px) {
+  .defsplit-grid {
+    grid-template-columns: 1fr;
+  }
+  .sf-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* print — used by the standalone pair page (#/pair/<id>) AND the defensibility
+   report. Strip chrome, force a light ink-on-paper rendering regardless of the
+   on-screen theme. */
 @media print {
   .topbar,
   .footer,
   .banner,
+  .eula,
+  .eula-scrim,
   .no-print {
     display: none !important;
   }
@@ -3264,7 +3908,10 @@ table.pairs.tg tbody tr.suppressed td.pos {
   .cite,
   .charges,
   .window .wnode,
-  .ev {
+  .ev,
+  .dcol,
+  .signoff,
+  .rules-table tbody tr {
     break-inside: avoid;
   }
   a[href^="http"]::after {

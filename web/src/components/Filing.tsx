@@ -4,10 +4,13 @@ import type {
   Claim,
   ClaimsResponse,
   LifecycleResponse,
+  SignoffRecord,
   SubmitResponse,
 } from "../types";
 import type { A21State } from "../a21";
 import { money2, prettyDate, provisionLabel } from "../format";
+import SignoffForm from "./SignoffForm";
+import Disclaimer from "./Disclaimer";
 
 interface Props {
   token: string;
@@ -29,10 +32,17 @@ export default function Filing({ token, a21 }: Props) {
   const [manifest, setManifest] = useState<SubmitResponse | null>(null);
   const [submitErr, setSubmitErr] = useState<string | null>(null);
 
+  // Licensed-filer sign-off (COMPLIANCE §4 P3) — gates the mock submit.
+  const [signoff, setSignoff] = useState<SignoffRecord | null>(null);
+
   useEffect(() => {
     let live = true;
     setLoading(true);
     setError(null);
+    // a fresh token is a fresh estimate → drop any prior sign-off / manifest.
+    setSignoff(null);
+    setManifest(null);
+    setSubmitErr(null);
     Promise.all([api.claims(token), api.lifecycle(token, true)])
       .then(([c, l]) => {
         if (!live) return;
@@ -56,13 +66,24 @@ export default function Filing({ token, a21 }: Props) {
   }, [token]);
 
   async function onSubmit() {
+    // Guard client-side too, so the message is instant if somehow unsigned.
+    if (!signoff) {
+      setSubmitErr("A licensed filer must sign off first — complete the sign-off above.");
+      return;
+    }
     setSubmitErr(null);
     setSubmitting(true);
     try {
       const res = await api.submit(token);
       setManifest(res);
     } catch (e) {
-      setSubmitErr(e instanceof Error ? e.message : "Mock submit failed.");
+      // The API returns 428 when no sign-off is recorded yet — translate to the
+      // explicit guardrail message regardless of how we got here.
+      if (e instanceof ApiError && e.status === 428) {
+        setSubmitErr("A licensed filer must sign off first before this claim can be submitted.");
+      } else {
+        setSubmitErr(e instanceof Error ? e.message : "Mock submit failed.");
+      }
     } finally {
       setSubmitting(false);
     }
@@ -97,6 +118,8 @@ export default function Filing({ token, a21 }: Props) {
         <span className="msg">{claims.banner}</span>
       </div>
 
+      <Disclaimer context="export" />
+
       {/* honest basis line: the server claim is generated on the best-estimate
           (301-on) basis; if A-21 is overridden, flag the divergence. */}
       <div className={`filing-basis ${a21 === "overridden" ? "warn" : ""}`}>
@@ -130,24 +153,41 @@ export default function Filing({ token, a21 }: Props) {
         ))}
       </section>
 
+      {/* P3 — the mandatory, logged sign-off gate, BEFORE the transmit action. */}
+      <SignoffForm token={token} signoff={signoff} onSigned={setSignoff} />
+
       <section className="panel">
         <div className="panel-head">
           <h3>Transmit</h3>
           <span className="hint">mock submit — writes local files only</span>
         </div>
         <div className="row wrap" style={{ gap: 14 }}>
-          <button className="btn amber" onClick={onSubmit} disabled={submitting}>
+          <button
+            className="btn amber"
+            onClick={onSubmit}
+            disabled={submitting || !signoff}
+            title={signoff ? undefined : "A licensed filer must sign off first"}
+          >
             {submitting ? <span className="sp" /> : <PaperIcon />}
             {submitting ? "Submitting (mock)…" : "Mock submit to CBP (simulated)"}
           </button>
           <span className="muted" style={{ fontSize: 12.5, maxWidth: 460 }}>
-            Generates the CATAIR text + JSON artifacts and returns a validation manifest. Nothing is
-            transmitted; a licensed filer must certify and send the real claim.
+            {signoff ? (
+              <>
+                Generates the CATAIR text + JSON artifacts and returns a validation manifest. Nothing
+                is transmitted; the recorded sign-off travels with the (simulated) claim.
+              </>
+            ) : (
+              <>
+                <b>A licensed filer must sign off first.</b> Complete the sign-off above to enable
+                the mock submit.
+              </>
+            )}
           </span>
         </div>
 
         {submitErr && (
-          <div className="errbox mt16">
+          <div className="errbox mt16" role="alert">
             <span className="x">!</span>
             <span>{submitErr}</span>
           </div>
@@ -159,6 +199,21 @@ export default function Filing({ token, a21 }: Props) {
               <CheckBadge />
               Mock submission accepted — {manifest.claims.length} claim(s) packaged
             </div>
+            {manifest.signoff && (
+              <div className="manifest-signoff">
+                <span className="ms-ck" aria-hidden>
+                  ✓
+                </span>
+                <span>
+                  Certified by <b>{manifest.signoff.filer_name}</b> ·{" "}
+                  {roleShort(manifest.signoff.role)}
+                  {manifest.signoff.license_number ? (
+                    <> · license <span className="mono">{manifest.signoff.license_number}</span></>
+                  ) : null}{" "}
+                  · <span className="mono">{prettyTs(manifest.signoff.attested_on)}</span>
+                </span>
+              </div>
+            )}
             {manifest.claims.map((m) => (
               <div className="mrow" key={m.claim_number}>
                 <span className="cn">{m.claim_number}</span>
@@ -297,6 +352,28 @@ function Lifecycle({ life }: { life: LifecycleResponse }) {
       </ol>
     </section>
   );
+}
+
+function roleShort(role: string): string {
+  const map: Record<string, string> = {
+    licensed_customs_broker: "Licensed customs broker",
+    customs_attorney: "Customs attorney",
+    self_filer_own_account: "Self-filing importer (own account)",
+  };
+  return map[role] ?? role.replace(/_/g, " ");
+}
+
+function prettyTs(iso: string): string {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return iso;
+  return d.toLocaleString("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    timeZoneName: "short",
+  });
 }
 
 function labelState(state: string): string {

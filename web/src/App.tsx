@@ -1,7 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
 import * as Tabs from "@radix-ui/react-tabs";
 import { api } from "./api";
-import type { AssumptionsResponse, ConfigSummary, Estimate } from "./types";
+import type {
+  AssumptionsResponse,
+  ConfigSummary,
+  DefensibilityReport,
+  Estimate,
+} from "./types";
 import { int } from "./format";
 import { useA21 } from "./a21";
 import { buildRegistry } from "./assumptions";
@@ -12,10 +17,12 @@ import Landing from "./components/Landing";
 import EstimateView from "./components/EstimateView";
 import GlassBox from "./components/GlassBox";
 import Filing from "./components/Filing";
+import Defensibility from "./components/Defensibility";
+import EulaGate from "./components/EulaGate";
 import PairPage from "./components/PairPage";
 import { TooltipProvider } from "./components/ui";
 
-type Tab = "estimate" | "glassbox" | "filing";
+type Tab = "estimate" | "glassbox" | "defensibility" | "filing";
 
 /** Parse the location hash for the standalone pair route (#/pair/<id>). */
 function readHash(): string | null {
@@ -26,6 +33,9 @@ function readHash(): string | null {
 
 export default function App() {
   const [estimate, setEstimate] = useState<Estimate | null>(null);
+  // The per-claim defensibility report, fetched alongside each estimate so the
+  // EstimateView can lead with the audit-defensible figure (COMPLIANCE §4 P1/P6).
+  const [defrep, setDefrep] = useState<DefensibilityReport | null>(null);
   const [tab, setTab] = useState<Tab>("estimate");
   const { theme, toggle } = useTheme();
 
@@ -72,12 +82,23 @@ export default function App() {
 
   function onEstimate(e: Estimate) {
     setEstimate(e);
+    setDefrep(null);
     setTab("estimate");
     window.scrollTo({ top: 0, behavior: "smooth" });
+    // Fetch the defensibility report so the estimate can lead with the
+    // audit-defensible figure. Non-blocking: the view degrades to the engine's
+    // own conservative floor if this fails.
+    api
+      .defensibility(e.token)
+      .then((r) => setDefrep(r))
+      .catch(() => {
+        /* report is an enhancement; EstimateView falls back to headline_low */
+      });
   }
 
   function reset() {
     setEstimate(null);
+    setDefrep(null);
     setTab("estimate");
     if (pairRoute) {
       window.location.hash = "";
@@ -106,6 +127,12 @@ export default function App() {
           <Tabs.Trigger className="tab" value="glassbox">
             Glass Box
             <span className="tnum">{int(estimate.summary.total_pair_count)}</span>
+          </Tabs.Trigger>
+          <Tabs.Trigger className="tab" value="defensibility">
+            Defensibility
+            {defrep && (
+              <span className="tnum">{int(defrep.tier_summary.VERIFIED ?? 0)}✓</span>
+            )}
           </Tabs.Trigger>
           <Tabs.Trigger className="tab" value="filing">
             Filing
@@ -160,13 +187,18 @@ export default function App() {
             <Tabs.Content value="estimate">
               <EstimateView
                 est={estimate}
+                defrep={defrep}
                 registry={registry}
                 a21={a21}
                 setA21={setA21}
+                onOpenDefensibility={() => setTab("defensibility")}
               />
             </Tabs.Content>
             <Tabs.Content value="glassbox">
               <GlassBox est={estimate} registry={registry} a21={a21} setA21={setA21} />
+            </Tabs.Content>
+            <Tabs.Content value="defensibility">
+              <Defensibility token={estimate.token} />
             </Tabs.Content>
             <Tabs.Content value="filing">
               <Filing token={estimate.token} a21={a21} />
@@ -181,6 +213,7 @@ export default function App() {
 
   return (
     <TooltipProvider>
+      <EulaGate />
       <a className="skip-link" href="#main">
         Skip to main content
       </a>

@@ -22,10 +22,12 @@ export default function Footer({ version, asOf }: Props) {
           <path d="M8 11V7a4 4 0 0 1 8 0v4" />
         </svg>
         <p className="ft">
-          <b>Preparation &amp; decision-support only.</b> Not the filer of record; not legal advice.
-          A licensed customs broker/filer must certify and transmit (19 CFR 190.6). Eligibility is
-          dated and litigation-sensitive — re-verify against current CSMS messages and CIT/Fed. Cir.
-          dockets before any real CBP filing.
+          <b>Decision-support software — not a customs broker, law firm, or accountant</b>, and not
+          a substitute for a licensed customs broker or attorney. It does not transact customs
+          business or file with CBP; a licensed filer must independently review and file, and must
+          certify and transmit any real claim (19 CFR 190.6). Estimates are not a guarantee.
+          Eligibility is dated and litigation-sensitive — re-verify against current CSMS messages and
+          CIT/Fed. Cir. dockets before any real CBP filing.
         </p>
         {(version || asOf) && (
           <span className="ver">

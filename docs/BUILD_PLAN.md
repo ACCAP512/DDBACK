@@ -49,7 +49,7 @@ server/                  NEW application layer (FastAPI app)
   db/                    SQLAlchemy 2.0 models + Alembic migrations (SQLite dev → Postgres prod)
   domain/                tenancy · clients · programs · claims · lines · DESIGNATION LEDGER · status ledger
   auth/                  users · password hashing · JWT sessions · RBAC (admin/preparer/reviewer/signer/client)
-  ocr/                   pipeline: PDF→image (pypdfium2) → OCR (Tesseract) → classify → extract → match
+  ocr/                   OcrBackend (pluggable): text-layer (pypdfium2) → cloud VLM default → local fallback → classify → extract → confirm
   workflow/              per-type CHECKLIST engine · reconciliation · Gaps&Chase tasks · client requests
   reports/               client recovery report (PDF) + internal XLSX (expected-vs-actual)
   services/              the seam to engine/: dataset→estimate→defensibility→persisted designations
@@ -110,9 +110,9 @@ double-designation (19 U.S.C. 1313(v)) **structurally impossible**, not merely w
 | DB (prod) | **PostgreSQL** | PostgreSQL (permissive) | driver: **pg8000** (BSD, pure-python) to avoid psycopg's LGPL flag |
 | ORM / migrations | **SQLAlchemy 2.0** + **Alembic** | MIT | the standard; permissive |
 | Auth | **argon2-cffi** (hash) + **PyJWT** | MIT | email/password + JWT sessions; RBAC in middleware |
-| PDF→image | **pypdfium2** | Apache-2.0/BSD | permissive (Google PDFium) — **avoid** PyMuPDF (AGPL) / Poppler (GPL) |
-| OCR engine | **Tesseract** via **pytesseract** | Apache-2.0 (both) | Tesseract is a **system binary invoked as a subprocess** (installed, not bundled) → no copyleft contamination |
-| (optional) cloud OCR | AWS Textract / Google Document AI | commercial | **opt-in only** (paid + client data leaves → DPA + EEI review); local is the default |
+| PDF text-layer + render | **pypdfium2** | Apache-2.0/BSD | **Tier 0:** extract the text layer when present (no OCR, no egress, free); also renders pages for the OCR tiers. **Avoid** PyMuPDF (AGPL) / Poppler (GPL) |
+| OCR — **default** | **cloud vision-LLM** (Gemini Flash / Claude Haiku), **paid tier, no-training / zero-retention** | commercial **API** (no copyleft) | **Tier 2 default for scans:** one-shot OCR + structured extraction; reliable on signed-then-scanned BOLs / proofs of export. At ~$0.001–0.005/page it's <2% of revenue — optimize for *reliable output*, not pennies. Subprocessor → list in DPA. An API has **no** copyleft issue (the GPL concern only applied to *bundling* Paperless-ngx) |
+| OCR — **fallback** | **Tesseract** (subprocess) or **docTR** (Apache-2.0), same `OcrBackend` | Apache-2.0 | **Tier 1 local fallback** for **privacy-locked / on-prem tenants** who can't send docs to a cloud subprocessor. Config flag per tenant, not a code fork |
 | Background jobs | **arq** (Redis) or a **DB-backed job table + worker** | MIT | MVP: DB-backed worker (no extra infra); upgrade later. Use **Valkey** (BSD) if Redis is added, not Redis (SSPL) |
 | XLSX report | **openpyxl** | MIT | internal expected-vs-actual report |
 | PDF report | **reportlab** | BSD | branded client recovery report; or HTML→PDF |
@@ -158,14 +158,25 @@ double-designation (19 U.S.C. 1313(v)) **structurally impossible**, not merely w
 - **Tests:** API correctness; an in-browser pass (login → cockpit → open a claim).
 
 ### M4 — OCR document-intake *(the headline new layer)*
-- Upload → tenant-scoped encrypted store → background **OCR (pypdfium2 + Tesseract)** → **classify** doc type
-  (7501 / BOL / AES-EEI / invoice / 7553 / BOM) → **extract entities** (entry #, ITN, HTS, dates, duty
-  amounts, parties) via per-type patterns → **propose a match** to client/program/claim/import-line/export-
-  line → **human-confirm** (extracted fields land as `needs-review` until confirmed — never auto-trusted).
-- **Full-text search** (FTS5) over OCR text; the **audit binder** per claim (originals + extracted data +
-  links + retention clock). **Barcode/cover-sheet routing** (secondary; for physical batch scans).
-- **Tests:** OCR pipeline on scanned-7501/BOL/AES fixtures; extraction accuracy thresholds; match-proposal
-  correctness; the confirm flow upgrades `needs-review → confirmed`; nothing auto-files.
+- Upload → tenant-scoped encrypted store → background extraction through a **pluggable `OcrBackend`** ladder:
+  **Tier 0** text-layer extract (pypdfium2) for digital PDFs — free, instant, no egress; **Tier 2 (default)**
+  a **cloud vision-LLM** (Gemini Flash / Claude Haiku, paid / no-train) for *scans* — one-shot OCR + structured
+  extraction, reliable on signed-then-scanned BOLs / proofs of export; **Tier 1** a **local** engine
+  (Tesseract / docTR) behind the same interface for privacy-locked tenants. Backend is **config per tenant**.
+- → **classify** doc type (7501 / BOL / AES-EEI / invoice / 7553 / BOM) → **extract entities** (entry #, ITN,
+  HTS, dates, duty amounts, parties) → **validate fields** (a date is a date, duty ≤ entered value, …) →
+  **propose a match** to client/program/claim/import-line/export-line → **human-confirm** (every extracted
+  field lands as `needs-review` until confirmed — never auto-trusted; the licensed filer certifies; nothing
+  auto-files). The confirm step is the safety net for VLM hallucination — the model makes the human *review*,
+  not *re-key*.
+- **Full-text search** (FTS5) over extracted text; the **audit binder** per claim (originals + extracted data
+  + links + retention clock). **Barcode/cover-sheet routing** (secondary; for physical batch scans).
+- **Cost / COGS hygiene** (so a pathological account can't surprise you, *not* penny-pinching): meter pages per
+  tenant even on flat billing; normalize/downsample images before the VLM (tokens scale with resolution);
+  cache extractions so confirm/edit loops don't re-bill; tier plans by claim volume so the whale self-selects.
+- **Tests:** the ladder routes correctly (text-layer hit skips OCR; scan → default; privacy-tenant → local);
+  extraction-accuracy thresholds on scanned-7501/BOL/AES fixtures; field-validation catches bad extractions;
+  match-proposal correctness; confirm upgrades `needs-review → confirmed`; nothing auto-files.
 
 ### M5 — Reconciliation workbench + per-type checklist + Gaps & Chase *(the workflow heart)*
 - **Checklist engine:** the required/optional document & data items **reconfigure by drawback type + config**
@@ -203,7 +214,9 @@ double-designation (19 U.S.C. 1313(v)) **structurally impossible**, not merely w
 
 - **Compliance evolves with the model.** Multi-tenant retention replaces "no-retention"; the `legal/` DPA +
   service-provider terms become load-bearing; encryption-at-rest + access-audit logging required once real
-  client data flows; local OCR keeps EEI in-tenant by default. The flat-fee, no-contingency, licensed-filer-
+  client data flows; the **default cloud OCR backend is a subprocessor** (paid / no-training tier) and must be
+  listed in the DPA, with a **local OCR fallback** for tenants that can't send EEI / trade docs off-tenant
+  (Tier 0 text-layer extraction also keeps digital PDFs off the wire). The flat-fee, no-contingency, licensed-filer-
   signs posture is unchanged. Update `COMPLIANCE.md` as M2/M4 land.
 - **Testing bar:** engine-grade for the designation ledger and the checklist/complete-claim gate (these are
   correctness/compliance-critical); standard coverage elsewhere; an in-browser pass per frontend milestone.
@@ -221,7 +234,8 @@ double-designation (19 U.S.C. 1313(v)) **structurally impossible**, not merely w
 - **Biggest risk = the designation ledger correctness** (cross-claim/cross-time double-designation). Mitigate
   with engine-grade tests and a DB-level constraint plus a service invariant that raises.
 - **Second risk = OCR accuracy → claim corruption.** Mitigated structurally: OCR is `needs-review` until
-  human-confirmed; the signer certifies; nothing auto-files. Local OCR first; cloud IDP opt-in.
+  human-confirmed; the signer certifies; nothing auto-files. Cloud VLM default for accuracy + field-validation;
+  local fallback for privacy-locked tenants.
 - **Scope honesty:** this is a multi-month application build (the *engine* — the hard, novel part — is done).
   Each milestone is independently demoable, so value compounds and the sell-vs-operate decision can be made at
   any point against a working, increasingly valuable asset.

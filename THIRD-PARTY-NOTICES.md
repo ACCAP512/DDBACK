@@ -18,6 +18,13 @@ terms — satisfied by this file and `sbom.json`.
 | pytest (test-only) | 8.2.2 | MIT |
 | httpx (test-only) | 0.27.0 | BSD-3-Clause |
 
+## Python (server/ application layer — persistence)
+| Component | Version | License | Notes |
+|---|---|---|---|
+| SQLAlchemy | 2.0.51 | MIT | ORM |
+| alembic | 1.16.5 | MIT | schema migrations |
+| pg8000 | 1.31.5 | BSD-3-Clause | pure-python PostgreSQL driver (prod). Chosen over psycopg to avoid its LGPL flag; SQLite (stdlib) is used in dev. |
+
 ## JavaScript / TypeScript (web frontend)
 | Component | Version | License |
 |---|---|---|

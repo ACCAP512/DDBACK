@@ -24,3 +24,8 @@ web/dist/
 
 # Mock filing transmissions written by the stubbed submit
 filing_out/
+
+# Local SQLite dev database (server/ app layer); prod uses Postgres via DRAWBACK_DATABASE_URL
+drawback_dev.db
+*.sqlite
+*.sqlite3

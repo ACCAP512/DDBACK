@@ -2,6 +2,35 @@
 
 Newest first. Short entries: done / next / blocked.
 
+## 2026-06-20 (broker-OS build — M2: auth & RBAC)
+- **Done (M2, per `docs/BUILD_PLAN.md` §5):**
+  - **Structural tenant isolation at the data-access layer** (`server/db/scoping.py`): a SQLAlchemy
+    `do_orm_execute` hook injects `WHERE tenant_id = <principal>` into **every** ORM SELECT for every
+    tenant-owned model via `with_loader_criteria` — so a forgotten filter cannot leak another tenant's
+    rows (isolation is structural, not route discipline). To make one predicate cover everything,
+    `tenant_id` was **denormalized onto Program/Claim/ChecklistItem** (migration M2). Unscoped/system
+    sessions (seam, migrations, login) are unaffected; explicit `skip_tenant_filter` opt-out for login.
+  - **Auth core:** argon2id password hashing (`auth/passwords.py`), JWT access tokens (`auth/tokens.py`,
+    secret from `DRAWBACK_JWT_SECRET`, per-process ephemeral fallback in dev), the `Principal`
+    (`auth/context.py`), and user provisioning/authentication (`auth/service.py`).
+  - **RBAC** (`auth/rbac.py`): Admin · Preparer · Reviewer · **Signer** · Client → permission sets. The
+    licensed-filer sign-off gate maps to `claims:sign`, held only by Signer (+ Admin).
+  - **Auth API** (`api/deps.py` + routers): `POST /api/auth/login`, `GET /api/auth/me`, tenant-scoped
+    `GET /api/clients` (client-role narrowed to its importer), tenant-scoped `GET /api/claims/{id}`, and
+    **Signer-only** `POST /api/claims/{id}/signoff` (reuses the engine's `filing.signoff` attestation;
+    audited). `get_scoped_db` binds the principal so every query is isolated.
+  - **Tests (+12 → 137 green):** argon2 hash/verify + JWT roundtrip/tamper/expiry; structural isolation
+    (a naive `select(Model)` and `get()` both return only the bound tenant; unscoped sees all; opt-out
+    works); end-to-end RBAC over HTTP (login, `/me`, preparer-signoff→403, signer-signoff→200,
+    incomplete-attestation→422, cross-tenant claim→404, clients list scoped). Engine's 112 untouched.
+  - Deps added + recorded (argon2-cffi, PyJWT — both MIT) in `requirements.txt`/`THIRD-PARTY-NOTICES.md`/
+    `sbom.json`. Alembic M2 migration chained on M1; `make migrate` builds the full M0→M2 chain.
+- **Next:** **M3** — portfolio cockpit & work-queue home (claims-by-status, exception lanes, the 5-year
+  clock; react-router + auth UI; the existing estimate/glass-box/defensibility/filing views become the
+  claim-detail tabs). **Blocked:** none. (Deferred to where they belong: full client-portal row-scoping
+  for claims via program join → M3; encryption-at-rest + retention → M4 when documents flow; a production
+  org-selector for same-email-across-tenants login.)
+
 ## 2026-06-20 (broker-OS build — M1: persistence spine + the DESIGNATION LEDGER)
 - **Done (M1, per `docs/BUILD_PLAN.md` §5/§8 — the P0 correctness core):**
   - **Designation ledger** (`server/domain/ledger.py`): per import line, summed across **all** claims

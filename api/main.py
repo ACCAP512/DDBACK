@@ -20,6 +20,7 @@ from fastapi import FastAPI, HTTPException, UploadFile, File  # noqa: E402
 from fastapi.middleware.cors import CORSMiddleware  # noqa: E402
 from fastapi.responses import JSONResponse  # noqa: E402
 from fastapi.staticfiles import StaticFiles  # noqa: E402
+from pydantic import BaseModel  # noqa: E402
 
 from drawback.config import tariff_eligibility as cfg  # noqa: E402
 from drawback.data.generator import generate  # noqa: E402
@@ -122,11 +123,48 @@ def claims(token: str) -> dict:
     }
 
 
+class SignoffRequest(BaseModel):
+    filer_name: str
+    role: str  # licensed_customs_broker | customs_attorney | self_filer_own_account
+    license_number: str = ""
+    accepted_defensible: bool = False
+    accepted_review_understood: bool = False
+
+
+@app.post("/api/claims/{token}/signoff")
+def signoff(token: str, req: SignoffRequest) -> dict:
+    """Record the licensed-filer / self-filer attestation that gates finalizing a claim (COMPLIANCE §4 P3)."""
+    s = _session(token)
+    from datetime import datetime, timezone
+    from drawback.filing.signoff import FilerAttestation, FilerRole, SignoffError, record
+    try:
+        role = FilerRole(req.role)
+    except ValueError:
+        raise HTTPException(422, f"invalid filer role '{req.role}' — must be one of "
+                                 f"{[r.value for r in FilerRole]}")
+    att = FilerAttestation(
+        filer_name=req.filer_name, role=role, attested_on=datetime.now(timezone.utc).isoformat(),
+        license_number=req.license_number, accepted_defensible=req.accepted_defensible,
+        accepted_review_understood=req.accepted_review_understood,
+    )
+    try:
+        rec = record(att)
+    except SignoffError as e:
+        raise HTTPException(422, str(e))
+    s["signoff"] = rec
+    return rec
+
+
 @app.post("/api/claims/{token}/submit")
 def submit(token: str) -> dict:
     s = _session(token)
+    if not s.get("signoff"):
+        raise HTTPException(428, "Licensed-filer sign-off required before submission. A licensed customs "
+                                 "broker/attorney or self-filing importer must accept the figures first "
+                                 "(POST /api/claims/{token}/signoff).")
     cl = build_claims(s["estimate"], import_charges_by_key=s["charges_by_key"])
     manifest = mock_submit(cl, ROOT / "filing_out")
+    manifest["signoff"] = s["signoff"]  # the recorded human attestation travels with the transmission
     return manifest
 
 

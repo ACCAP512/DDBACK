@@ -58,31 +58,36 @@ This product prepares filings that, if wrong, expose a real importer to CBP pena
 
 Prereqs: Python 3.9+, Node 18+ (built on 3.9 / Node 25).
 
-```bash
-make setup     # venv + Python deps + build the React SPA + generate sample data
-make run       # serve API + SPA at http://localhost:8000
-```
-Open **http://localhost:8000**, acknowledge the field-of-use gate, click **"Load sample data"**, and
-you'll see the instant estimate (leading with the **audit-defensible** figure). Drill into any matched
-pair in **Glass Box**, validate the number in the **Defensibility** tab (reconciliation + rules-fired with
-citations), and sign off + mock-submit a claim in **Filing**.
+The React SPA is now the **broker OS** — the multi-tenant cockpit built around the engine
+(`docs/BUILD_PLAN.md`; milestones M0–M3 done). Stand it up:
 
-End-to-end on **real-format ingested data** (NetSuite + CBP 7501/ACE + AES/EEI → estimate → defensibility
-→ signed claim):
 ```bash
-make demo
+make setup     # venv + Python deps + build the SPA + generate sample data
+make seed      # reset + seed a demo broker book-of-business into the dev DB
+make server    # serve the broker-OS API + SPA at http://localhost:8001
+```
+Open **http://localhost:8001** and sign in (password `drawback`): `admin@northstar.test` (full access),
+`signer@northstar.test` (can certify), or `client@northstar.test` (read-only, one importer). You land on
+the **work queue** — triage lanes, the **5-year expiring-value clock**, and per-client accrued $ — then open
+any claim to its tabs: **Overview** (lifecycle + sign-off), **Glass-box** (every matched pair + its trace),
+**Ledger** (available → designated → remaining), and **Audit**.
+
+See the engine's single-claim pipeline end-to-end on **real-format ingested data** (NetSuite + CBP 7501/ACE
++ AES/EEI → estimate → defensibility → signed claim):
+```bash
+make demo                     # engine CLI; also at the legacy estimator API: make run (:8000)
 ```
 
 Dev mode (hot-reload frontend):
 ```bash
-make dev                      # API on :8000
+make server                   # broker-OS API + SPA on :8001
 # in another shell:
-cd web && npm run dev         # Vite on :5173, proxies /api -> :8000
+cd web && npm run dev         # Vite on :5173, proxies /api -> :8001
 ```
 
-Run the tests (112, all green):
+Run the tests (158, all green — engine 112 + broker-OS app layer 46):
 ```bash
-make test                     # pytest — the engine's correctness suite
+make test                     # pytest — engine correctness + app-layer suite
 ```
 
 Regenerate the synthetic samples:

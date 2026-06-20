@@ -111,3 +111,29 @@ and anything requiring a customs broker license. Noted as future work.
 - Market-size priors ("$15B unclaimed", "80% never file", "Charter = 1/3") are **unsourced vendor marketing**
   and are **not** presented as fact anywhere; the sourced figure (drawback paid ≈ $1B FY2019 → ~$3.9B FY2023)
   frames the docs instead.
+
+## 9. Broker-OS application layer (M0–M3 built; M4–M7 not yet)
+The `server/` + `web/src/broker/` multi-tenant app brings auth/multi-tenancy **in scope** (superseding §7's
+single-claim-engine "out of scope" note) — see `docs/BUILD_PLAN.md`. Built and tested: M0 scaffold, M1
+persistence + the **designation ledger** (across-time 1313(v) conservation), M2 auth + structural tenant
+isolation + RBAC, **M3 portfolio cockpit + work-queue home** (this milestone). Not yet built: **M4** OCR
+document-intake, **M5** reconciliation workbench + checklist + Gaps&Chase, **M6** configs/privileges + bond/AP
++ client deliverables, **M7** lifecycle/lookup/alerts + hardening. Specific M3-era gaps:
+- **5-year-clock scaling.** The expiring-value rollup (`server/domain/clock.py`) is *precise* (it reuses the
+  engine's dated eligibility config) but computes the eligible-duty-at-risk with a **Python pass over the
+  tenant's import lines** — streamed for bounded memory, yet O(import lines) CPU per cockpit load. At the
+  RESEARCH-sized book (10⁵–10⁷ lines) the documented optimization is to **denormalize an `eligible_duty`
+  column** at upsert time → a pure SQL/materialized rollup (or a cached summary). Correct today; not yet
+  optimized for the largest books. No coverage is silently capped.
+- **Lifecycle controls are minimal.** `POST /claims/{id}/transition` walks the M1 status ledger with a
+  file-needs-sign-off gate (428); the richer lifecycle (180-day protest clock, AP true-up workflow, RFI
+  handling, retention timer) is M7. CBP liquidation/payment figures are entered by staff (no ACE feed).
+- **Client portal is partial.** The `client` role is read-only and row-scoped to its one importer at the
+  data layer (verified), and lands on its own claims; a polished standalone client portal is later work.
+- **Login is single-tenant-per-email** (carried from M2): if one email exists in two tenants, login is
+  rejected rather than disambiguated — a production org-selector is a documented follow-up.
+- **Claim-detail trace rendering** uses a JSON view of the engine's glass-box trace; reusing the demo SPA's
+  richer `TraceDrawer` (numbered derivation, live citation links) against the persisted designation is a
+  deferred polish item.
+- **Engine purity preserved.** The app consumes the engine one-way (a test asserts `engine/drawback/` stays
+  stdlib-only); none of M0–M3 modified the engine or its 112 tests.

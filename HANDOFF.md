@@ -5,43 +5,50 @@ Everything below is durable in this repo (git) and in the builder's project memo
 
 ---
 
-## Where we are (2026-06-19)
+## Where we are (2026-06-20)
 
 - **The engine is built and verified — the hard, novel part is done.** Pure-stdlib matcher (exact
   min-cost-max-flow), VERIFIED-only structurally-defensible headline, mandatory licensed-filer sign-off,
-  and real-format ingestion (NetSuite × CBP 7501/ACE × AES/EEI). **112 tests green**, verified in-browser.
+  and real-format ingestion (NetSuite × CBP 7501/ACE × AES/EEI). The 112 engine tests stay green, untouched.
 - **The direction is decided:** evolve the single-claim engine into a multi-tenant **"arm-the-broker"
   drawback OS** — sell flat-fee tooling so customs brokers / in-house duty-drawback specialists keep their
   **own** portfolio (the anti-Pax / picks-and-shovels play; sell-vs-operate endgame stays open).
   Rationale: `docs/MONETIZATION.md`, `docs/UX_WORKFLOW_PLAN.md`.
-- **The build plan is written:** `docs/BUILD_PLAN.md` (milestones **M0 → M7**). We are **about to start
-  M0 + M1**. None of the new application layer is built yet — this is the clean starting line.
+- **The build is in motion:** `docs/BUILD_PLAN.md` (milestones **M0 → M7**). **M0–M3 are done — 158 tests
+  green.** The `server/` app layer + the persisted **designation ledger** (across-time 1313(v) conservation),
+  **auth + structural tenant isolation + RBAC**, and the **portfolio cockpit & work-queue home** (react-router
+  SPA: login → cockpit → claim-detail tabs). It is now a real multi-tenant web app, not just a calculator.
+  **M4 (OCR document-intake) is next.** Run `make seed && make server` → open http://localhost:8001.
 
 ---
 
 ## Resume prompt (paste into a fresh session opened in this repo)
 
-> Read `HANDOFF.md`, `docs/BUILD_PLAN.md`, and `docs/COMPLIANCE.md`, then start **M0 + M1**: scaffold the
-> new `server/` layer (FastAPI + SQLAlchemy, SQLite dev → Postgres, permissive deps only, engine stays
-> pure-stdlib), lay down the domain schema + first Alembic migration, and build the **persisted designation
-> ledger with its across-time anti-double-claim (19 U.S.C. 1313(v)) conservation test**. Keep
-> `engine/drawback/` and its 112 tests untouched. Small commits.
+> Read `HANDOFF.md`, `docs/BUILD_PLAN.md` (§5 M4), and `docs/COMPLIANCE.md`, then start **M4 — OCR
+> document-intake**: upload → tenant-scoped encrypted store → background extraction through the pluggable
+> `OcrBackend` ladder (Tier 0 text-layer via pypdfium2 → **Tier 2 cloud vision-LLM default** → Tier 1 local
+> fallback for privacy-locked tenants, config per tenant) → classify → extract entities → validate →
+> propose-match → **human-confirm** (`needs_review` until confirmed; nothing auto-files); FTS5 search + the
+> audit binder + per-tenant page metering. Keep `engine/drawback/` and its 112 tests untouched; permissive
+> deps only; record any new dep in `THIRD-PARTY-NOTICES.md`/`sbom.json`. Small commits, each ends green.
 
 ---
 
-## The next action — M0 + M1 (the foundation)
+## Done so far (M0–M3) · the next action (M4)
 
-- **M0 — scaffold.** New `server/` package: `db · domain · auth · ocr · workflow · reports · services ·
-  api · worker.py`. FastAPI app; SQLAlchemy 2.0 + Alembic; SQLite for dev. The engine is untouched and
-  imported as a library.
-- **M1 — persistence + the make-or-break control.** The domain schema —
-  `Tenant → User → Client → Program → Claim → ClaimLine`, plus `ImportEntryLine`, `ExportLine`,
-  **`Designation`** (★ the ledger), `Document`, `ChecklistItem`, `Task`, `AuditEvent` — with the first
-  migration, **and the persisted designation ledger**: per import line `available → designated → remaining`
-  duty, summed across **all** claims over time, with an invariant that **raises** on any over-designation.
-  Build it to engine-grade test rigor (including an across-time conservation test). This is the single
-  thing a multi-claim tool must get right — it makes double-designation structurally impossible (1313(v)).
-  See `docs/BUILD_PLAN.md` → §8 "Start here."
+- **M0–M3 are built and green (158 tests).** M0 scaffolded `server/` (FastAPI + SQLAlchemy 2.0 + Alembic,
+  SQLite dev; engine imported as a library). M1 laid the domain schema + the persisted **designation ledger**
+  (per import line `available → designated → remaining`, summed across **all** claims over time, raising on
+  any over-designation — 1313(v) made structurally impossible). M2 added auth (argon2 + JWT), **structural
+  tenant isolation** at the data layer, and RBAC (Admin/Preparer/Reviewer/**Signer**/Client). M3 built the
+  **portfolio cockpit & work-queue home**: rollup domain (lanes, per-client accrued, the **5-year clock**),
+  the cockpit/management/list/lifecycle API, a demo seed (`make seed`), and the **react-router SPA** (login →
+  cockpit → claim-detail tabs: Overview/Glass-box/Ledger/Audit). The engine + its 112 tests are untouched.
+- **The next action — M4 (OCR document-intake).** The headline new layer: the pluggable `OcrBackend` ladder
+  (text-layer → cloud-VLM default → local fallback), classify → extract → validate → propose-match →
+  **human-confirm**, FTS5 + the audit binder, per-tenant metering. OCR *proposes*; a human *confirms*; the
+  signer *certifies* — nothing auto-files. See `docs/BUILD_PLAN.md` → §5 (M4) and the cloud-VLM-default plan
+  (`git log` — "plan(M4)"). The `server/ocr/` package is a placeholder awaiting this build.
 
 ---
 
@@ -84,9 +91,12 @@ Everything below is durable in this repo (git) and in the builder's project memo
 
 ```bash
 cd ~/Desktop/drawback-engine
-make test     # 112 green — the engine's correctness suite
-make demo     # real-format ingest → estimate → defensibility → signed claim
-make run      # serve API + SPA at http://localhost:8000
+make test     # 158 green — engine (112) + broker-OS app layer (46)
+make demo     # real-format ingest → estimate → defensibility → signed claim (engine CLI)
+make migrate  # build the broker-OS schema (alembic upgrade head)
+make seed     # reset + seed a demo broker book-of-business into the dev DB (M3 cockpit)
+make server   # serve the broker-OS API + SPA at http://localhost:8001
+              #   sign in: admin@northstar.test / signer@northstar.test / client@northstar.test  (pw: drawback)
 ```
 
-If `make test` is green, the foundation you're building on is sound. Then start **M0**.
+If `make test` is green, the foundation you're building on is sound. Then start **M4**.

@@ -2,6 +2,48 @@
 
 Newest first. Short entries: done / next / blocked.
 
+## 2026-06-20 (broker-OS build — M3: portfolio cockpit & work-queue home)
+- **Done (M3, per `docs/BUILD_PLAN.md` §5 — flip "calculator" → "daily tool"):**
+  - **Portfolio rollups** (`server/domain/`): `portfolio.py` — the claims-by-status histogram, the
+    work-queue **lanes** (awaiting-sign-off / ready-to-file / CBP-RFI / draft / filed / liquidated, plus a
+    cross-cutting **exceptions** lane for estimated→defensible gaps), and **per-client accrued $**
+    (pipeline → in-flight → realized). `clock.py` — the **5-year expiring-value clock** (19 U.S.C.
+    1313(r)(1); A-09): reuses the engine's `five_year_deadline` **and** the dated `tariff_eligibility`
+    config, so the cockpit's deadline + eligible-duty never disagree with the estimate; at-risk = eligible
+    duty on the **undesignated** units (a ceiling, never overstated), bucketed by urgency; streams the line
+    table for bounded memory. Every aggregate runs on the tenant-scoped session (isolation is structural —
+    confirmed the M2 hook filters column/aggregate selects too).
+  - **Cockpit API** (`api/routers/portfolio.py`): `GET /api/portfolio/summary` (one call: histogram +
+    lanes + clock + accrued + reconciled totals) and `/clock`. **Staff-only** — the read-only client role
+    is refused the cross-client cockpit.
+  - **Management + list + lifecycle API**: clients (+create, +detail with accrued), a new **programs**
+    router (list/create/detail), and claims (list with status/client/program filters + pagination +
+    client-role narrowing; enriched detail; glass-box `/designations` with traces; `/ledger`; `/audit`;
+    **`/transition`** reusing the M1 status ledger, gated so an UNSIGNED claim cannot be **filed** → 428).
+    Sign-off endpoint preserved.
+  - **Demo seed** (`make seed`, `scripts/seed_broker.py`): one broker tenant, a user per role, three
+    importer clients, programs, and claims across every lane — one the **real** engine-seam claim (13 pairs,
+    traces) — plus undesignated import lines spanning the clock buckets. The broker-OS app now also
+    **serves the built SPA** (`make server`).
+  - **Frontend** (`web/src/broker/`): **react-router (HashRouter) + JWT auth** (login, route guard, authed
+    fetch client) + an app shell; the **work-queue home** (totals, triage lanes, the 5-year clock,
+    per-client accrued); client & program management; a claim list → **claim-detail tabs** (Overview +
+    lifecycle + sign-off / Glass-box / Ledger / Audit) — the existing estimate/glass-box/defensibility/
+    filing surfaces, now bound to the persisted claim.
+  - **Tests (+21 → 158 green):** clock (eligible-duty filter, deadline==engine, undesignated proration,
+    fully-designated drop-out, urgency buckets, isolation); portfolio (lane split + exceptions, accrued incl.
+    zero-claim clients, isolation); cockpit API (summary reconciles, clock drill-down, client-role 403);
+    management/list/lifecycle (create RBAC+audit, filters/pagination, client narrowing, detail/glass-box/
+    ledger, the file-needs-sign-off gate). Engine's 112 untouched. **In-browser pass** (login → cockpit →
+    open a claim → all four tabs → draft→ready transition + revert; client-role narrowed to its own claims):
+    no console errors. Seed numbers: **$537.6k** of eligible duty at risk on the 5-year clock, **$364.9k**
+    pipeline / **$260k** in-flight / **$70.25k** realized across three clients.
+- **Next:** **M4** — OCR document-intake (the cloud-VLM-default ladder; upload → classify → extract →
+  validate → propose-match → human-confirm; FTS5 + the audit binder; per-tenant page metering). **Blocked:**
+  none. (Deferred follow-ups: the clock's at-risk pass is O(import lines) in Python — denormalize an
+  `eligible_duty` column → SQL/materialized rollup for very large books; a production org-selector for
+  same-email-across-tenants login; richer trace rendering reusing the demo's TraceDrawer.)
+
 ## 2026-06-20 (broker-OS build — M2: auth & RBAC)
 - **Done (M2, per `docs/BUILD_PLAN.md` §5):**
   - **Structural tenant isolation at the data-access layer** (`server/db/scoping.py`): a SQLAlchemy

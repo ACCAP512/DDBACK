@@ -1,13 +1,14 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "./styles.css";
-import App from "./App";
+import "./broker/broker.css";
+import BrokerApp from "./broker/BrokerApp";
 
 const el = document.getElementById("root");
 if (!el) throw new Error("root element not found");
 
 createRoot(el).render(
   <StrictMode>
-    <App />
+    <BrokerApp />
   </StrictMode>,
 );

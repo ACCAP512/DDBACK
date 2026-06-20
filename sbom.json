@@ -20,6 +20,8 @@
     { "type": "library", "name": "SQLAlchemy", "version": "2.0.51", "scope": "required", "licenses": [{ "license": { "id": "MIT" } }], "purl": "pkg:pypi/sqlalchemy@2.0.51" },
     { "type": "library", "name": "alembic", "version": "1.16.5", "scope": "required", "licenses": [{ "license": { "id": "MIT" } }], "purl": "pkg:pypi/alembic@1.16.5" },
     { "type": "library", "name": "pg8000", "version": "1.31.5", "scope": "required", "licenses": [{ "license": { "id": "BSD-3-Clause" } }], "purl": "pkg:pypi/pg8000@1.31.5" },
+    { "type": "library", "name": "argon2-cffi", "version": "23.1.0", "scope": "required", "licenses": [{ "license": { "id": "MIT" } }], "purl": "pkg:pypi/argon2-cffi@23.1.0" },
+    { "type": "library", "name": "PyJWT", "version": "2.13.0", "scope": "required", "licenses": [{ "license": { "id": "MIT" } }], "purl": "pkg:pypi/pyjwt@2.13.0" },
     { "type": "library", "name": "react", "version": "18.3.1", "scope": "required", "licenses": [{ "license": { "id": "MIT" } }], "purl": "pkg:npm/react@18.3.1" },
     { "type": "library", "name": "react-dom", "version": "18.3.1", "scope": "required", "licenses": [{ "license": { "id": "MIT" } }], "purl": "pkg:npm/react-dom@18.3.1" },
     { "type": "library", "name": "@radix-ui/react-dialog", "version": "1.1.6", "scope": "required", "licenses": [{ "license": { "id": "MIT" } }], "purl": "pkg:npm/%40radix-ui/react-dialog@1.1.6" },

@@ -7,6 +7,15 @@ here is hidden in the UI; the app marks every simulated seam and every conservat
 - The engine **prepares, computes, and formats**; it does **not** certify or transmit a claim and is **not**
   legal advice (19 CFR 190.6; ASSUMPTION A-17). A licensed customs broker/attorney or the claimant's
   authorized signer must certify and file via ACE/ABI. The UI and README state this plainly.
+- **Compliance posture (see [`COMPLIANCE.md`](COMPLIANCE.md)).** The team is unlicensed; the lawful path is
+  to **sell/flat-fee-license** the software (CBP HQ H350722, Jan 2026) — operating it as a service would be
+  unlicensed customs business. Enforced in code/docs: a **mandatory licensed-filer sign-off gate**
+  (`filing/signoff.py`; `submit` 428s until a lawful operator attests) and an estimate-not-promise posture.
+  A customs/privacy attorney must finalize the EULA/DPA (drafts in `legal/`) before real use.
+- **Correctness hardening (`defensibility.py`).** A **structurally-guaranteed defensible headline** rests
+  ONLY on [VERIFIED] legal rules; a **reconciliation invariant raises** on any 99%/lesser-of/claimed-≤-duty
+  violation; a per-claim **defensibility report** lets a customs professional validate from the trace alone.
+  This is a *post-hoc validator over public output* — it does not change the matcher's computed numbers.
 
 ## 2. Legal-scope limitations (what the engine does and does not compute)
 - **Drawback types:** fully built = **unused merchandise, §1313(j)(1) direct-ID and (j)(2) substitution**
@@ -48,12 +57,19 @@ here is hidden in the UI; the app marks every simulated seam and every conservat
   ~50 curated codes covering the electronics persona plus deliberate "other"-basket cases. Unknown codes get
   0 base/301 rates and are flagged by the parser as a data-quality warning. **Seam:** swap in a real HTSUS
   reference behind the same interface and the rules/matcher are unchanged.
-- **All bundled data is synthetic** (`data/generator.py`), clearly labelled and isolated from any real path.
-  It is realistic but illustrative; the dollar magnitudes are not a real importer's.
+- **All bundled data is synthetic** (`data/generator.py` and the ingest demo `samples/demo_netsuite` +
+  `samples/demo_customs`), clearly labelled and isolated from any real path. It is **real-format** (the
+  field names/layouts are real — CBP 7501/ACE, AES/EEI per 15 CFR 30.6, NetSuite saved-search ids) but the
+  **values are synthetic and illustrative**; the dollar magnitudes are not a real importer's.
 - **Liquidation status** is taken from the data (A-14); the engine cannot independently verify finality.
   Not-liquidated imports are excluded from the headline and surfaced as potential.
-- **Ingestion** is built for the ACE/ITRAC-like CSV schema in `samples/`. PDF-7501 parsing, per-broker CSV
-  mapping, and ERP/EEI feeds are realistic future adapters, not built (the parser is the clean seam).
+- **Ingestion (`drawback/ingest/`):** a real-format layer now joins a **NetSuite commercial spine** to a
+  **CBP 7501/ACE + AES/EEI customs overlay** → the engine's input contract, with quantity reconciliation,
+  multi-receipt-to-one-entry, and AES export-proof matching. Every NetSuite/customs→drawback mapping is
+  tagged `[VERIFIED]/[INFERRED]/[GUESS]` in [`INGESTION.md`](INGESTION.md). **Not built / future adapters:**
+  scanned-PDF OCR (deliberately out of scope — structured files only), the full long tail of per-broker
+  column header variants (a small alias layer is included), and ERP systems other than NetSuite. Real broker
+  files vary; expect a per-tenant column-mapping step before production.
 
 ## 5. Stubbed (designed, not live) — external blockers
 - **CBP/ACE/ABI transmission:** there is no filer code, broker license, or ACE access in this build. Layer 3
@@ -62,7 +78,12 @@ here is hidden in the UI; the app marks every simulated seam and every conservat
   transmits nothing. Marked "SIMULATED" in code and UI (D-009).
 - **Claim lifecycle / status dashboard:** runs on **simulated** status data behind a clean interface
   (`filing/lifecycle.py`). Projected dates illustrate AP vs. liquidation timing; they are not real CBP events.
-- **The licensed-filer / audit-defense human workflow** is represented in the lifecycle and UX but not faked.
+- **The licensed-filer / audit-defense human workflow** is represented in the lifecycle and UX but not faked;
+  the **sign-off gate** (`filing/signoff.py`) records a real attestation structure but does not verify a
+  broker's license against any registry — that check belongs to the operating broker/importer.
+- **Live NetSuite access:** the ingestion layer ships a `StubbedNetSuiteClient` marked "NOT CONNECTED —
+  fixture mode" reading the demo fixtures. The live **SuiteQL / SuiteTalk REST** client (OAuth/TBA) is the
+  documented seam (`ingest/client.py`), not implemented — no live credentials in this build.
 
 ## 6. Engine performance & scaling
 - The matcher decomposes per **8-digit HTS bucket** and runs an exact min-cost-max-flow per bucket. Concrete

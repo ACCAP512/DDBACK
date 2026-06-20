@@ -2,6 +2,28 @@
 
 Newest first. Short entries: done / next / blocked.
 
+## 2026-06-19 (monetization + compliance + product-readiness "Option B")
+- **Strategy:** owner is unlicensed, no customers, $0 budget, won't raise, open to selling. Research →
+  `docs/MONETIZATION.md` (sell/license to funded AI entrants / brokers; flat-fee only). Legal research →
+  `docs/COMPLIANCE.md`: CBP HQ H350722 (Jan 2026) confirms **selling/licensing is the clean path**;
+  operating it unlicensed would be customs business. Data: local/no-retention (already so) keystone for EEI
+  confidentiality. IP: public-domain law + permissive deps + AI-assisted-but-assignable → clean, title clear
+  (built solo, not employed).
+- **Done (readiness build, compliant-by-design, all committed):**
+  - **Correctness hardening** `defensibility.py`: structurally [VERIFIED]-only defensible headline +
+    reconciliation invariant (raises, never clamps) + per-claim defensibility report; `/api/defensibility`.
+  - **Licensed-filer sign-off gate** `filing/signoff.py`: `submit` 428s until a lawful operator attests.
+  - **Real-format ingestion** `drawback/ingest/`: NetSuite spine × CBP 7501/ACE + AES/EEI overlay →
+    engine contract; demo dataset; `make demo` (ingest→estimate→defensibility→signed claim); `/api/estimate/demo`.
+  - **IP/diligence pack** (LICENSE, THIRD-PARTY-NOTICES, AI-DISCLOSURE, sbom.json) + **legal/** templates
+    (EULA/DPA/privacy — attorney drafts).
+  - Full suite **112 green**. Demo: best \$137.7K / audit-defensible \$11.9K, reconciliation OK.
+- **In flight:** frontend compliance UI (estimate-not-promise + defensible-number lead, disclaimers + EULA
+  gate, defensibility report view, sign-off form gating submit).
+- **Next:** verify the frontend in-browser; update README. **Blocked:** none (attorney finalization of
+  EULA/DPA and the employment/title items are owner actions, documented).
+
+
 ## 2026-06-19 (UX research + execution)
 - **Done:** Ran 6 parallel primary-source UX/UX-research streams (NN/g, Baymard, WCAG 2.2, Google PAIR,
   peer-reviewed uncertainty-viz, design-system docs, competitor teardown) → `docs/UX_RESEARCH.md`

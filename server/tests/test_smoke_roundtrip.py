@@ -25,9 +25,13 @@ def _demo_dataset():
 
 def _seed_org(session: Session, importer_id: str):
     tenant = m.Tenant(name="Acme Customs Brokerage", kind=TenantKind.broker_firm)
-    client = m.Client(tenant=tenant, name="Importer LLC", importer_id=importer_id or "00-0000000")
-    program = m.Program(client=client, name="Unused substitution (j2)", drawback_type=DrawbackType.j2)
-    session.add_all([tenant, client, program])
+    session.add(tenant)
+    session.flush()
+    client = m.Client(tenant_id=tenant.id, name="Importer LLC", importer_id=importer_id or "00-0000000")
+    program = m.Program(
+        tenant_id=tenant.id, client=client, name="Unused substitution (j2)", drawback_type=DrawbackType.j2
+    )
+    session.add_all([client, program])
     session.flush()
     return program
 

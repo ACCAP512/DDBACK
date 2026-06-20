@@ -179,6 +179,7 @@ def persist_estimate(
 
     # 4) The Claim — the engine's headline/defensible figures become the ledger's tracked amounts.
     claim = m.Claim(
+        tenant_id=client.tenant_id,
         program_id=program.id,
         period=period,
         mode=mode,

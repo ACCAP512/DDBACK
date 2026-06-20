@@ -122,6 +122,8 @@ class Program(Entity, Base):
 
     __tablename__ = "programs"
 
+    # Denormalized for row-level tenant isolation (every tenant-owned row carries tenant_id; M2).
+    tenant_id: Mapped[str] = mapped_column(ForeignKey("tenants.id"), nullable=False, index=True)
     client_id: Mapped[str] = mapped_column(ForeignKey("clients.id"), nullable=False, index=True)
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     drawback_type: Mapped[DrawbackType] = mapped_column(
@@ -140,6 +142,8 @@ class Program(Entity, Base):
 class Claim(Entity, Base):
     __tablename__ = "claims"
 
+    # Denormalized for row-level tenant isolation (M2).
+    tenant_id: Mapped[str] = mapped_column(ForeignKey("tenants.id"), nullable=False, index=True)
     program_id: Mapped[str] = mapped_column(ForeignKey("programs.id"), nullable=False, index=True)
     period: Mapped[Optional[str]] = mapped_column(String(64), nullable=True)
     mode: Mapped[ClaimMode] = mapped_column(
@@ -275,6 +279,8 @@ class ChecklistItem(Entity, Base):
 
     __tablename__ = "checklist_items"
 
+    # Denormalized for row-level tenant isolation (M2).
+    tenant_id: Mapped[str] = mapped_column(ForeignKey("tenants.id"), nullable=False, index=True)
     claim_id: Mapped[str] = mapped_column(ForeignKey("claims.id"), nullable=False, index=True)
     key: Mapped[str] = mapped_column(String(64), nullable=False)
     label: Mapped[str] = mapped_column(String(255), nullable=False)

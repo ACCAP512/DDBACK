@@ -24,15 +24,17 @@ from server.services.engine_seam import persist_estimate, run_estimate
 # ── seeding helpers ──────────────────────────────────────────────────────────
 def _seed_chain(session: Session):
     tenant = m.Tenant(name="Acme Brokerage", kind=TenantKind.broker_firm)
-    client = m.Client(tenant=tenant, name="Importer LLC", importer_id="12-3456789")
-    program = m.Program(client=client, name="J2", drawback_type=DrawbackType.j2)
-    session.add_all([tenant, client, program])
+    session.add(tenant)
+    session.flush()
+    client = m.Client(tenant_id=tenant.id, name="Importer LLC", importer_id="12-3456789")
+    program = m.Program(tenant_id=tenant.id, client=client, name="J2", drawback_type=DrawbackType.j2)
+    session.add_all([client, program])
     session.flush()
     return client, program
 
 
 def _claim(session: Session, program: m.Program) -> m.Claim:
-    claim = m.Claim(program_id=program.id)
+    claim = m.Claim(tenant_id=program.tenant_id, program_id=program.id)
     session.add(claim)
     session.flush()
     return claim

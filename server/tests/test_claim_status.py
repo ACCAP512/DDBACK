@@ -20,10 +20,12 @@ from server.domain.status import (
 
 def _seed_claim(session: Session, status: ClaimStatus = ClaimStatus.draft) -> m.Claim:
     tenant = m.Tenant(name="Acme", kind=TenantKind.broker_firm)
-    client = m.Client(tenant=tenant, name="Importer LLC", importer_id="12-3456789")
-    program = m.Program(client=client, name="J2", drawback_type=DrawbackType.j2)
-    claim = m.Claim(program=program, status=status)
-    session.add_all([tenant, client, program, claim])
+    session.add(tenant)
+    session.flush()
+    client = m.Client(tenant_id=tenant.id, name="Importer LLC", importer_id="12-3456789")
+    program = m.Program(tenant_id=tenant.id, client=client, name="J2", drawback_type=DrawbackType.j2)
+    claim = m.Claim(tenant_id=tenant.id, program=program, status=status)
+    session.add_all([client, program, claim])
     session.flush()
     return claim
 

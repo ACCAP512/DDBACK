@@ -130,6 +130,16 @@ def submit(token: str) -> dict:
     return manifest
 
 
+@app.get("/api/defensibility/{token}")
+def defensibility(token: str) -> dict:
+    """The per-claim defensibility report (COMPLIANCE §4 P6): the structurally [VERIFIED]-only defensible
+    headline, the reconciliation check, and the rules-fired/tier/citation breakdown — validatable from the
+    trace alone. Non-strict so a (hypothetical) violation surfaces in the report rather than 500-ing."""
+    s = _session(token)
+    from drawback.defensibility import harden
+    return harden(s["estimate"], strict=False).report()
+
+
 @app.get("/api/lifecycle/{token}")
 def lifecycle(token: str, accelerated_payment: bool = True) -> dict:
     s = _session(token)

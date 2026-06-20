@@ -10,6 +10,13 @@ confidence level.
 > or a licensed customs broker/attorney via ACE/ABI (19 CFR 190.6). Every CBP-connected step here is
 > **simulated** and clearly marked. All bundled data is **synthetic**.
 
+**Compliant by design (see [`docs/COMPLIANCE.md`](docs/COMPLIANCE.md)).** The product is built to be
+**sold or flat-fee-licensed** to a licensed customs broker/attorney or a self-filing importer — the lawful
+path for an unlicensed software vendor (CBP HQ H350722). It enforces this in code: an estimate-not-promise
+framing, a **structurally-defensible headline that rests only on [VERIFIED] legal rules**, and a
+**mandatory licensed-filer sign-off** before any claim file is final. The go-to-market analysis is in
+[`docs/MONETIZATION.md`](docs/MONETIZATION.md); attorney-ready EULA/DPA/privacy drafts are in [`legal/`](legal/).
+
 *Working codename — naming is out of scope. Built per the Phase-0-gated PRD; see `docs/`.*
 
 ---
@@ -55,9 +62,16 @@ Prereqs: Python 3.9+, Node 18+ (built on 3.9 / Node 25).
 make setup     # venv + Python deps + build the React SPA + generate sample data
 make run       # serve API + SPA at http://localhost:8000
 ```
-Open **http://localhost:8000**, click **"Load sample data"**, and you'll see the instant estimate.
-Then open the **Glass Box** tab to drill into any matched pair, and **Filing** for the stubbed claim +
-lifecycle.
+Open **http://localhost:8000**, acknowledge the field-of-use gate, click **"Load sample data"**, and
+you'll see the instant estimate (leading with the **audit-defensible** figure). Drill into any matched
+pair in **Glass Box**, validate the number in the **Defensibility** tab (reconciliation + rules-fired with
+citations), and sign off + mock-submit a claim in **Filing**.
+
+End-to-end on **real-format ingested data** (NetSuite + CBP 7501/ACE + AES/EEI → estimate → defensibility
+→ signed claim):
+```bash
+make demo
+```
 
 Dev mode (hot-reload frontend):
 ```bash
@@ -66,7 +80,7 @@ make dev                      # API on :8000
 cd web && npm run dev         # Vite on :5173, proxies /api -> :8000
 ```
 
-Run the tests:
+Run the tests (112, all green):
 ```bash
 make test                     # pytest — the engine's correctness suite
 ```
@@ -84,15 +98,20 @@ engine/drawback/        Pure-stdlib engine core (auditable, dependency-free)
   rules/                hts · time_windows · computation · eligibility · inventory  (read like a spec)
   matching/             mcmf (exact min-cost flow) · engine (two-pass optimizer) · trace
   data/                 hts_reference (local fixture) · generator (synthetic) · parser (CSV + DQ)
-  filing/               catair (stubbed claim file) · lifecycle (simulated status)
-  estimate.py           orchestration: Dataset -> Estimate
-  serialize.py          engine -> JSON
-engine/tests/           ground-truth, rule, adversarial, reconciliation, property, parser, perf
-api/main.py             FastAPI: ingest -> estimate -> glass-box -> stubbed filing; serves the SPA
-web/                    React + TypeScript + Vite SPA (Layers 1-3)
-samples/                committed synthetic CSVs + a reference estimate + simulated claim files
-scripts/make_samples.py regenerates samples/
+  ingest/               real-format ingestion: NetSuite spine × CBP 7501/ACE + AES/EEI overlay -> contract
+  filing/               catair (stubbed claim file) · lifecycle · signoff (licensed-filer gate)
+  assumptions.py        first-class A-01..A-23 registry (VERIFIED/INFERRED/GUESS + citations)
+  defensibility.py      hardening: structural VERIFIED-only headline + reconciliation invariant + report
+  estimate.py · serialize.py   orchestration: Dataset -> Estimate -> JSON
+engine/tests/           112 tests: ground-truth, rule, adversarial, reconciliation, property, parser,
+                        perf, defensibility, sign-off, ingestion
+api/main.py             FastAPI: (sample|upload|demo) -> estimate -> glass-box -> defensibility -> signed filing
+web/                    React + TypeScript + Vite SPA (Estimate · Glass Box · Defensibility · Filing)
+samples/                synthetic CSVs + the real-format ingest demo (demo_netsuite / demo_customs)
+scripts/                make_samples.py · demo.py (the make demo chain)
+legal/                  EULA · DPA · privacy-policy templates (attorney drafts)
 docs/                   RESEARCH · ASSUMPTIONS · DECISIONS · PLAN · PROGRESS · LIMITATIONS · WALKTHROUGH
+                        · COMPLIANCE · MONETIZATION · UX_RESEARCH · INGESTION
 ```
 
 The engine core imports **only the Python standard library** (money in `Decimal`, a hand-rolled exact

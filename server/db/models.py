@@ -193,9 +193,11 @@ class ImportEntryLine(Entity, Base):
 
 
 class ExportLine(Entity, Base):
-    """An export or destruction event — AES/EEI or bill-of-lading derived."""
+    """An export or destruction event — AES/EEI or bill-of-lading derived. Identified within a client
+    by its ``reference`` (BOL / AES ITN / invoice) so the same export can't be claimed twice."""
 
     __tablename__ = "export_lines"
+    __table_args__ = (UniqueConstraint("client_id", "reference"),)
 
     tenant_id: Mapped[str] = mapped_column(ForeignKey("tenants.id"), nullable=False, index=True)
     client_id: Mapped[str] = mapped_column(ForeignKey("clients.id"), nullable=False, index=True)
@@ -228,6 +230,9 @@ class Designation(Entity, Base):
         ForeignKey("export_lines.id"), nullable=False, index=True)
     quantity: Mapped[int] = mapped_column(Integer, nullable=False)
     provision: Mapped[str] = mapped_column(String(8), nullable=False)  # CATAIR provision code
+    # The eligible per-unit import duty this designation draws from the import line — constant per
+    # import line, so it lets the ledger express the conservation in duty as well as quantity.
+    per_unit_designated_duty: Mapped[Decimal] = mapped_column(Money, nullable=False)
     per_unit_recovery: Mapped[Decimal] = mapped_column(Money, nullable=False)
     recovery: Mapped[Decimal] = mapped_column(Money, nullable=False)
     recovery_low: Mapped[Decimal] = mapped_column(Money, nullable=False)

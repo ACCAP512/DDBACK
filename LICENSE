@@ -1,24 +1,38 @@
 Copyright (c) 2026 Adam Chreki. All rights reserved.
 
-PROPRIETARY AND CONFIDENTIAL.
+SOURCE-AVAILABLE — ALL RIGHTS RESERVED. NOT OPEN-SOURCE.
 
-This software and its source code, documentation, and associated materials (the
-"Software") are proprietary to and the exclusive property of the copyright holder.
-The Software is NOT open-source and is not licensed to the public.
+This source code is published publicly for portfolio, evaluation, and reference
+purposes. Making the source viewable does NOT grant any license to use it.
 
-No license, right, or interest in the Software is granted except under a separate,
-signed written agreement with the copyright holder (e.g., a commercial software
-license, evaluation/pilot agreement, or asset-purchase agreement). Absent such an
-agreement, no person may use, copy, modify, distribute, sublicense, sell, or create
-derivative works of the Software, in whole or in part.
+No license, right, or interest in the Software (its source code, documentation, and
+associated materials) is granted except under a separate, signed written agreement with
+the copyright holder (e.g., a commercial software license, evaluation/pilot agreement, or
+asset-purchase agreement). Absent such an agreement, no person may use, run, copy, modify,
+deploy, distribute, sublicense, sell, or create derivative works of the Software, in whole
+or in part, beyond viewing the published source (and forking within GitHub solely to
+review it).
 
-Third-party open-source components included with the Software are licensed under their
-own permissive terms (MIT / BSD / Apache-2.0); see THIRD-PARTY-NOTICES.md and sbom.json.
-Those notices apply only to the listed third-party components, not to the Software itself.
+Interested in licensing or acquiring the Software? Contact the copyright holder.
 
-The Software is duty-drawback DECISION-SUPPORT software. It is not a customs broker, law
-firm, or accountant; it is not a substitute for a licensed customs broker or attorney; it
-does not transact customs business or file with U.S. Customs and Border Protection. A
-licensed filer must independently review and file any claim. See docs/COMPLIANCE.md.
+Third-party open-source components included with the Software are licensed under their own
+permissive terms (MIT / BSD / Apache-2.0); see THIRD-PARTY-NOTICES.md and sbom.json. Those
+notices apply only to the listed third-party components, not to the Software itself.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED.
+----------------------------------------------------------------------------------------
+
+The Software is duty-drawback DECISION-SUPPORT software. It is NOT a customs broker, law
+firm, or accountant; it is NOT legal advice; it is NOT a substitute for a licensed customs
+broker or attorney; and it does NOT transact customs business or file with U.S. Customs and
+Border Protection. A licensed filer must independently review and file any claim.
+
+All bundled data is SYNTHETIC. The tariff-eligibility configuration is date-stamped and
+ILLUSTRATIVE; it MUST be independently re-verified before any real-world use. See
+docs/COMPLIANCE.md and docs/LIMITATIONS.md.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
+PURPOSE, AND NONINFRINGEMENT. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
+CLAIM, DAMAGES, OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT, OR OTHERWISE,
+ARISING FROM, OUT OF, OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.

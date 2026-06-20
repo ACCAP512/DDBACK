@@ -10,14 +10,29 @@ confidence level.
 > or a licensed customs broker/attorney via ACE/ABI (19 CFR 190.6). Every CBP-connected step here is
 > **simulated** and clearly marked. All bundled data is **synthetic**.
 
-**Compliant by design (see [`docs/COMPLIANCE.md`](docs/COMPLIANCE.md)).** The product is built to be
-**sold or flat-fee-licensed** to a licensed customs broker/attorney or a self-filing importer — the lawful
-path for an unlicensed software vendor (CBP HQ H350722). It enforces this in code: an estimate-not-promise
-framing, a **structurally-defensible headline that rests only on [VERIFIED] legal rules**, and a
-**mandatory licensed-filer sign-off** before any claim file is final. The go-to-market analysis is in
-[`docs/MONETIZATION.md`](docs/MONETIZATION.md); attorney-ready EULA/DPA/privacy drafts are in [`legal/`](legal/).
+## What this is
 
-*Working codename — naming is out of scope. Built per the Phase-0-gated PRD; see `docs/`.*
+A **complete, correctness-first system built solo** — a pure-stdlib decision engine wrapped in a
+multi-tenant web app — published **source-available for review** ([`LICENSE`](LICENSE); all rights
+reserved, not open-source). It's a working artifact and portfolio piece, not a live commercial service.
+
+**Notable engineering:**
+- An **exact integer min-cost-max-flow matcher**, hand-rolled and **validated against brute force**, that
+  assigns exports to duty-paid imports to maximize recovery under the legal constraints — with a
+  human-readable **trace for every claimed dollar**.
+- A **pure-Python-stdlib engine core** (money in `decimal.Decimal`, zero third-party deps) so the legal
+  logic is fully auditable — plus a **158-test** suite (ground-truth, rule, adversarial, reconciliation,
+  property, performance).
+- Legal rules rebuilt from **primary sources**, each tagged `[VERIFIED]/[INFERRED]/[GUESS]` with citations
+  carried into every trace; the engine is **conservative** (ambiguity lowers the number, never inflates it).
+- A **multi-tenant app layer** (FastAPI + SQLAlchemy) with **structural tenant isolation**, RBAC, a
+  mandatory licensed-filer **sign-off gate**, and a persisted **designation ledger** that makes
+  double-claiming (19 U.S.C. 1313(v)) structurally impossible across claims and over time.
+- A worked-through **compliance & IP posture** ([`docs/COMPLIANCE.md`](docs/COMPLIANCE.md)) and
+  attorney-ready legal templates ([`legal/`](legal/)).
+
+*The encoded law is public-domain; the dependency tree is permissive; all bundled data is synthetic.
+Available for licensing or acquisition — see [`LICENSE`](LICENSE). Working codename; naming was out of scope.*
 
 ---
 

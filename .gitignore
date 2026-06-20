@@ -29,3 +29,11 @@ filing_out/
 drawback_dev.db
 *.sqlite
 *.sqlite3
+
+# Secrets / local env — NEVER commit (DRAWBACK_JWT_SECRET etc. come from the environment)
+.env
+.env.*
+*.pem
+*.key
+secrets.*
+credentials.*

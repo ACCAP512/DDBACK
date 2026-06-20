@@ -1,0 +1,13 @@
+Internal ID,Type,Document Number,Date,Name,Other Ref Num,Item,Memo,Quantity,Units,Item Rate,Amount,Ship Country,HTS Code
+31001,Item Fulfillment,IF50012,2023-09-12,Maple Systems Integration Inc,CI-50012,DCM-750-A,"Electric DC motor 24V 500W",2000,No.,41.00,82000.00,CA,8501.31.4000
+31002,Item Fulfillment,IF50019,2023-11-08,Rhein Automation GmbH,CI-50019,PSU-240-B,"Switching power supply 240W",1200,No.,62.00,74400.00,DE,8504.40.9500
+31003,Item Fulfillment,IF50027,2024-02-15,Tokyo Robotics KK,CI-50027,SW-1000-C,"Panel switch <=1000V",3000,No.,12.00,36000.00,JP,8536.50.9000
+31004,Item Fulfillment,IF50041,2024-05-20,Maple Systems Integration Inc,CI-50041,NET-SW-24,"24-port networking switch",500,No.,142.00,71000.00,CA,8517.62.0000
+31005,Item Fulfillment,IF50048,2024-06-30,Britewire Ltd,CI-50048,CONN-DB9,"Insulated connector assembly DB9",4500,No.,5.10,22950.00,GB,8544.42.9000
+31006,Item Fulfillment,IF50055,2024-08-18,Maple Systems Integration Inc,CI-50055,BRKT-STL-1,"Steel mounting bracket (substitutable 10-digit)",1200,No.,15.00,18000.00,CA,7326.90.8635
+31007,Item Fulfillment,IF50063,2024-11-22,Rhein Automation GmbH,CI-50063,PSU-240-B,"Switching power supply 240W",1600,No.,63.00,100800.00,DE,8504.40.9500
+31008,Item Fulfillment,IF50071,2025-01-19,Tokyo Robotics KK,CI-50071,NET-SW-24,"24-port networking switch",800,No.,150.00,120000.00,JP,8517.62.0000
+31009,Item Fulfillment,IF50079,2025-03-28,Maple Systems Integration Inc,CI-50079,DCM-750-A,"Electric DC motor 24V 500W (no AES filed)",1500,No.,43.00,64500.00,CA,8501.31.4000
+31010,Item Fulfillment,IF50086,2025-06-14,Britewire Ltd,CI-50086,CONN-DB9,"Insulated connector assembly DB9",4000,No.,5.20,20800.00,GB,8544.42.9000
+31011,Item Fulfillment,IF50094,2025-08-09,Andes Steel Partners SA,CI-50094,BRKT-STL-2,"Steel bracket, other-basket (blocked)",900,No.,16.00,14400.00,CL,7326.90.8688
+31012,Item Fulfillment,IF50101,2025-07-22,Maple Systems Integration Inc,CI-50101,DCM-750-A,"Electric DC motor 24V 500W",1800,No.,42.00,75600.00,CA,8501.31.4000

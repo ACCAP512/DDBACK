@@ -3,13 +3,14 @@
 PY := .venv/bin/python
 PIP := .venv/bin/pip
 
-.PHONY: help setup venv frontend run dev test samples clean
+.PHONY: help setup venv frontend run dev test demo samples clean
 
 help:
 	@echo "make setup     - create venv, install Python deps, build the frontend"
 	@echo "make run       - serve API + built SPA at http://localhost:8000 (one process)"
 	@echo "make dev       - API on :8000 + Vite dev server on :5173 (two processes)"
 	@echo "make test      - run the engine test suite (pytest)"
+	@echo "make demo      - end-to-end on real-format ingested data: ingest -> estimate -> defensibility -> signed claim"
 	@echo "make samples   - regenerate samples/ (CSVs, estimate, claim files)"
 	@echo "make clean     - remove venv, node_modules, build output"
 
@@ -34,6 +35,9 @@ dev:
 
 test:
 	@$(PY) -m pytest
+
+demo:
+	@PYTHONPATH=engine $(PY) scripts/demo.py
 
 samples:
 	@PYTHONPATH=engine $(PY) scripts/make_samples.py

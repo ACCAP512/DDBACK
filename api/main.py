@@ -92,6 +92,21 @@ def estimate_sample(scale: str = "demo") -> dict:
     return _estimate_payload(token, dataset, estimate)
 
 
+@app.post("/api/estimate/demo")
+def estimate_demo() -> dict:
+    """Ingest the real-format demo (NetSuite commercial + CBP 7501/ACE + AES/EEI customs overlay) and
+    return an estimate — so all three views run end-to-end on ingested data, not just CSV (COMPLIANCE
+    Phase 2). Falls back gracefully if the ingest demo fixtures are absent."""
+    from drawback.ingest import ingest_dataset
+    nd, cd = SAMPLES / "demo_netsuite", SAMPLES / "demo_customs"
+    if not (nd.exists() and cd.exists()):
+        raise HTTPException(404, "ingest demo fixtures not found (samples/demo_netsuite, samples/demo_customs)")
+    dataset = ingest_dataset(nd, cd)
+    estimate = build_estimate(dataset)
+    token = _store(dataset, estimate)
+    return _estimate_payload(token, dataset, estimate)
+
+
 @app.post("/api/estimate/upload")
 async def estimate_upload(imports: UploadFile = File(...), exports: UploadFile = File(...)) -> dict:
     """Ingest a client's import + export CSVs and return an instant estimate (FR1.1)."""

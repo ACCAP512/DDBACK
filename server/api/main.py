@@ -10,7 +10,10 @@ from __future__ import annotations
 
 import server  # noqa: F401  -- path bootstrap: makes `drawback` importable
 
+from pathlib import Path
+
 from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
 from sqlalchemy import inspect
 
 from drawback.config import tariff_eligibility as cfg
@@ -50,3 +53,11 @@ def readiness() -> dict:
         "tables": sorted(table_names),
         "hint": None if migrated else "run `make migrate` (alembic upgrade head)",
     }
+
+
+# ── serve the built SPA (single-process run) ────────────────────────────────
+# Mounted last so the /api/* routers above always take precedence. The SPA uses hash routing, so this
+# static mount needs no deep-link fallback. Absent a build, the API still runs headless.
+_DIST = Path(__file__).resolve().parents[2] / "web" / "dist"
+if _DIST.is_dir():
+    app.mount("/", StaticFiles(directory=str(_DIST), html=True), name="spa")

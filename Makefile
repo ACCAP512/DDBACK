@@ -3,7 +3,7 @@
 PY := .venv/bin/python
 PIP := .venv/bin/pip
 
-.PHONY: help setup venv frontend run dev test demo samples clean migrate server
+.PHONY: help setup venv frontend run dev test demo samples clean migrate server seed
 
 help:
 	@echo "make setup     - create venv, install Python deps, build the frontend"
@@ -12,6 +12,7 @@ help:
 	@echo "make test      - run the full test suite (engine + server/ app layer)"
 	@echo "make demo      - end-to-end on real-format ingested data: ingest -> estimate -> defensibility -> signed claim"
 	@echo "make migrate   - build the broker-OS schema (alembic upgrade head)"
+	@echo "make seed      - reset + seed a demo broker book-of-business into the dev DB (M3 cockpit)"
 	@echo "make server    - serve the broker-OS app layer at http://localhost:8001 (M0+)"
 	@echo "make samples   - regenerate samples/ (CSVs, estimate, claim files)"
 	@echo "make clean     - remove venv, node_modules, build output"
@@ -43,6 +44,9 @@ demo:
 
 migrate:
 	@.venv/bin/alembic upgrade head
+
+seed:
+	@$(PY) scripts/seed_broker.py
 
 server:
 	@$(PY) -m uvicorn server.api.main:app --host 127.0.0.1 --port 8001

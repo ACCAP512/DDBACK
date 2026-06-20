@@ -2,6 +2,33 @@
 
 Newest first. Short entries: done / next / blocked.
 
+## 2026-06-20 (broker-OS build — M1: persistence spine + the DESIGNATION LEDGER)
+- **Done (M1, per `docs/BUILD_PLAN.md` §5/§8 — the P0 correctness core):**
+  - **Designation ledger** (`server/domain/ledger.py`): per import line, summed across **all** claims
+    over **all** time, `available → designated → remaining` (qty **and** duty). `assert_capacity_available()`
+    **raises** `OverDesignationError` if a persist would push any import/export line past its imported/
+    exported quantity — double-drawback (19 U.S.C. 1313(v)) is now *structurally impossible to persist*,
+    not merely warned. Computed from natural keys, writing nothing, so a violation rolls back clean.
+  - **Shared line identity:** `persist_estimate` now **upserts** import/export lines by natural key
+    ((client, entry, line) / (client, reference)), so a new claim designates against the *same* rows prior
+    claims used — the prerequisite that makes cross-claim conservation real. Designations persist
+    `per_unit_designated_duty` (constant per line ⇒ duty conservation follows quantity).
+  - **Claim status ledger** (`server/domain/status.py`): `transition_claim()` validates the lifecycle
+    (draft→ready→filed→under_review→liquidated→paid + lawful step-backs), stamps timestamps, records the
+    liquidated/paid **true-up** (`actual_refund`), and **audits every change**; illegal transitions raise
+    (`InvalidTransitionError`) and mutate nothing.
+  - **Schema:** Alembic M1 migration (chained on M0) adds the duty column + export unique constraint;
+    verified upgrade/downgrade round-trip; `make migrate` builds the full chain.
+  - **Tests (+9 → 125 green):** the per-line ledger view (qty+duty), Σ-across-claims, over-designation
+    raises on **both** import and export sides (exact-fill fits, +1 raises), end-to-end double-claim blocked
+    with nothing partial; full status lifecycle sets timestamps/money + audits each step, illegal transitions
+    rejected. Engine's 112 untouched. End-to-end demo: claim $137,696.51 est / $11,875.48 defensible, a fully-
+    designated line shows remaining 0 / $0, lifecycle draft→paid with a complete audit trail.
+- **Next:** **M2** — auth & RBAC (argon2 + JWT; tenant isolation at the data-access layer; roles
+  Admin/Preparer/Reviewer/**Signer**/Client; signer-only sign-off). **Blocked:** none. (Hardening follow-up:
+  a DB-level trigger as defense-in-depth behind the service invariant; concurrency/locking for the ledger
+  check under simultaneous writers.)
+
 ## 2026-06-19 (broker-OS build — M0: foundation & scaffolding)
 - **Done (M0, per `docs/BUILD_PLAN.md` §5/§8):** stood up the new `server/` application layer *around* the
   untouched engine. Additive only — `engine/drawback/` and its 112 tests are unchanged.

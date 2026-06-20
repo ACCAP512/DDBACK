@@ -15,13 +15,14 @@ from sqlalchemy import inspect
 
 from drawback.config import tariff_eligibility as cfg
 import server.db.scoping  # noqa: F401  -- registers the tenant-isolation ORM event
-from server.api.routers import auth, claims, clients, portfolio
+from server.api.routers import auth, claims, clients, portfolio, programs
 from server.db.base import engine
 
 app = FastAPI(title="Drawback Broker OS", version="0.1.0-m3")
 
 app.include_router(auth.router)
 app.include_router(clients.router)
+app.include_router(programs.router)
 app.include_router(claims.router)
 app.include_router(portfolio.router)
 

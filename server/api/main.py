@@ -15,14 +15,15 @@ from sqlalchemy import inspect
 
 from drawback.config import tariff_eligibility as cfg
 import server.db.scoping  # noqa: F401  -- registers the tenant-isolation ORM event
-from server.api.routers import auth, claims, clients
+from server.api.routers import auth, claims, clients, portfolio
 from server.db.base import engine
 
-app = FastAPI(title="Drawback Broker OS", version="0.1.0-m2")
+app = FastAPI(title="Drawback Broker OS", version="0.1.0-m3")
 
 app.include_router(auth.router)
 app.include_router(clients.router)
 app.include_router(claims.router)
+app.include_router(portfolio.router)
 
 
 @app.get("/api/health")
@@ -31,7 +32,7 @@ def health() -> dict:
     return {
         "ok": True,
         "layer": "server (broker OS)",
-        "milestone": "M0",
+        "milestone": "M3",
         "engine_tariff_config": cfg.VERSION,
         "as_of": cfg.AS_OF.isoformat(),
     }

@@ -14,19 +14,28 @@ we handle data.
   **processed to compute your estimate and prepare claim materials.** This is overwhelmingly business/
   commercial data about entities (e.g., EINs), not consumer personal information.
 
-## **[COMPLIANCE] How we handle your trade data — local & non-retained by default**
-The Software is designed to process your import/export data **locally / in your environment and NOT to
-store it.** By default we **do not retain** your trade data, the generated CATAIR file, or the trace —
-they are computed ephemerally and deleted after processing. **We do not sell or share your data, and we do
-not use it to train any model.** Confidential export information (EEI) is handled per 15 CFR § 30.60 (see
-our Data Processing Addendum).
+## **[COMPLIANCE] How we handle your trade data**
+The Software offers **two modes**, and we describe each truthfully:
+- **Local / on-prem:** your import/export data is processed **in your environment and not stored by us** —
+  computed ephemerally and deleted after processing.
+- **Hosted (multi-tenant):** to maintain your book of claims, claim history, and audit binder (records you
+  are required to keep), we **store** your data in a **tenant-isolated, encrypted** account, governed by our
+  **Data Processing Addendum**.
+
+In **both** modes we **do not sell or share your data and do not use it to train any model.** Scanned
+documents may be read by a document-OCR subprocessor bound to **no-training / zero-retention** terms — or,
+at your option, by an **in-tenant local engine** so nothing leaves your account. Confidential export
+information (EEI) is handled per **15 CFR § 30.60** as your authorized agent (see our Data Processing
+Addendum).
 
 ## Why we process
 To provide the estimate/claim-preparation service, support it, secure it, and meet legal obligations.
 
 ## Sharing
 We do not sell personal information. We share data only with subprocessors necessary to run the service
-(if any), each bound by confidentiality and data-protection terms, and as required by law.
+(e.g., cloud hosting; a document-OCR provider on a no-training / zero-retention tier — which you can disable
+in favor of in-tenant local OCR), each bound by confidentiality and data-protection terms, and as required
+by law.
 
 ## Your rights
 Depending on your location (e.g., CCPA/CPRA, GDPR), you may have rights to access, delete, correct, or
@@ -38,9 +47,12 @@ We use reasonable, industry-standard safeguards (encryption in transit/at rest f
 access controls, audit logging) proportionate to the data.
 
 ## Retention
-We retain account data for the duration of the relationship. **We do not retain your trade data** beyond
-the processing session by default. (You — not we — retain your records for the statutory periods: EEI 5
-years from export, 15 CFR § 30.10; drawback records 3 years from liquidation, 19 U.S.C. § 1508(c).)
+We retain account data for the duration of the relationship. In **local / on-prem** mode we **do not retain
+your trade data** beyond the processing session. In **hosted** mode we retain your trade data and claim
+records **to maintain your book of claims and audit binder**, per a retention/deletion policy keyed to the
+statutory clocks and your instructions; you may export or request deletion (subject to records you must
+keep). You remain the keeper of legal record for the statutory periods: **EEI 5 years from export**
+(15 CFR § 30.10); **drawback records 3 years from liquidation** (19 U.S.C. § 1508(c)).
 
 ## Contact & changes
 **[Legal name, address, contact email.]** We will post changes here with an updated date.

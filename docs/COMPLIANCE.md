@@ -20,9 +20,13 @@ before it touches a real user or real data, and one fact must be confirmed.**
   flat-fee-licensing the software to a licensed broker, or to an importer self-filing its own account,
   who operates it under their own judgment, makes you a software vendor, not a customs-business actor.**
   Your plan and the legal path are the same path.
-- ✅ **The data architecture is already right.** EEI (export) data is *statutorily confidential*
-  (15 CFR 30.60); the risk is disclosing it to a hosted third party. The product's **local, no-retention,
-  "nothing is sent" design avoids that at the root** — preserve it as the default.
+- ✅ **The data architecture is sound — now in two modes.** EEI (export) data is *statutorily confidential*
+  (15 CFR 30.60); the risk is disclosing it to a hosted third party. The **local / on-prem mode** keeps the
+  original "in-tenant, non-retained, nothing-sent" design (the strongest EEI posture — keep it offered). The
+  **hosted multi-tenant mode** (the broker-OS build) *retains the broker's book of claims* — which the law
+  in fact requires them to keep (recordkeeping, §2) — under **tenant isolation + encryption + a DPA +
+  no-train subprocessor terms**, storing EEI only as the customer's written-authorized agent (15 CFR 30.3).
+  Both are defensible; the hosted default rests on **security + contract**, not on non-retention.
 - ✅ **The IP is unusually clean and assignable.** The encoded law is public-domain (17 U.S.C. 105 +
   *Georgia v. Public.Resource.Org*); the dependency tree is permissive-only (no copyleft) with a
   stdlib core; AI-assisted code is ownable and assignable (the AI vendor's terms assign output to the
@@ -115,17 +119,28 @@ conservative-range design is the *right* instinct — it substantiates and bound
 (broker confidentiality, flows down); CCPA/CPRA (B2B exemption expired 2023; service-provider terms,
 Cal. Code Regs. 11 §7051); GDPR Art. 28.
 
-**The keystone:** EEI is confidential and **may not be disclosed by the USPPI/agent for nonofficial
-purposes** — and disclosure to a *third-party SaaS vendor* is exactly the enumerated risk. **It falls on
-the customer, and it is avoided entirely by local/customer-controlled processing — which the product
-already does.** This is the single most important data fact: keep EEI/entry processing local and
-non-retained by default. If a hosted mode is ever built, only ingest EEI server-side as the customer's
-written-authorized representative (15 CFR 30.3) under strict use-limitation terms.
+**The keystone (now two modes):** EEI is confidential and **may not be disclosed by the USPPI/agent for
+nonofficial purposes** — disclosure to a *third-party SaaS vendor* is exactly the enumerated risk. In
+**local / on-prem mode** this is *avoided at the root* (nothing is sent — the strongest posture; keep it
+available for privacy-sensitive brokers). In the **hosted multi-tenant mode** the broker-OS build now ships,
+the tool **does** store EEI/entry data server-side, so the control shifts from *avoidance* to **lawful
+custody**: ingest EEI only as the customer's **written-authorized representative (15 CFR 30.3)**, under
+strict use-limitation, **tenant isolation, encryption at rest, access-audit logging, a DPA, and
+no-training/zero-retention subprocessor terms** (incl. the document-OCR provider; an in-tenant local-only
+OCR option exists). Retention here is **not a liability to apologize for** — drawback *requires* the customer
+to keep these records (3 yr from liquidation; EEI 5 yr), so secure custody **is** the service. The
+record-keeping burden stays the operator's; the vendor provides secure custody under the DPA.
 
 **Required mitigations (Regime 2):**
-1. **Local / customer-controlled processing as the default and marketed posture** (the keystone control).
-2. **True non-retention** — compute ephemerally; delete inputs and the generated CATAIR/trace at session
-   end; make the "not stored, not shared" claim factually true.
+1. **Two deployment modes, each truthfully described:** **local / on-prem** (in-tenant, non-retained — the
+   keystone posture, kept for privacy-sensitive customers) and **hosted multi-tenant** (retains the book of
+   claims under isolation + encryption + DPA). Market each accurately; never claim "nothing is stored" of the
+   hosted mode.
+2. **Hosted-mode data controls** (where data persists, these replace "non-retention"): **tenant isolation**
+   (done — `server/db/scoping.py`), **encryption at rest**, **access-audit logging**, a **retention/deletion
+   policy** keyed to the statutory clocks, and **no-training/zero-retention subprocessor terms** for the
+   document-OCR provider (cloud default; in-tenant local-only OCR option). EEI stored only as the customer's
+   authorized agent (15 CFR 30.3).
 3. **A DPA / service-provider addendum** with every real-data engagement — one doc that satisfies CCPA
    service-provider terms (no retention/use/disclosure beyond the service; no sale/share/combine), GDPR
    Art. 28 if EU personal data appears, and confidentiality flow-down for brokers' 19 CFR 111.24 duty.
@@ -137,7 +152,8 @@ written-authorized representative (15 CFR 30.3) under strict use-limitation term
 7. **Surface the dual retention clocks** in guidance (EEI 5 yr from export; drawback records 3 yr from
    liquidation) — and don't imply *you* retain them; the customer does.
 8. **Sequence SOC 2:** security questionnaire + one-page control brief now → SOC 2 Type I when a customer
-   first requires it → Type II at scale. **No SOC 2 needed for a controlled, local, no-retention pilot.**
+   first requires it → Type II at scale. A **local / on-prem, no-retention pilot needs no SOC 2**; the
+   **hosted multi-tenant mode raises security to load-bearing** — Type I becomes the likely first ask.
 9. **Scope to reality:** you're very likely below CCPA "business" thresholds (so you're a *service
    provider*, not a covered business); GDPR generally isn't triggered for a US-broker/US-transaction tool
    unless EU natural persons appear — don't over-build EU machinery.
@@ -192,7 +208,7 @@ written-authorized representative (15 CFR 30.3) under strict use-limitation term
 | P2 | Conspicuous disclaimer at onboarding, on every estimate, and in the claim export (per §1.5 text) | 1 | small |
 | P3 | **Mandatory, logged licensed-filer / self-filer sign-off** before a CATAIR file is "final"; the human affirmatively accepts rule selections, matches, and figures; recorded with name/role/timestamp | 1 (the dispositive one) | medium |
 | P4 | EULA field-of-use gate enforced in-app (attest: licensed broker/attorney, or self-filing own account) + flat-fee posture | 1 | small |
-| P5 | Make local/no-retention real and visible (no server-side EEI ingestion; ephemeral compute; "not stored" claim true); add a data-handling notice | 2 | small–med |
+| P5 | Describe **both modes** truthfully: keep local/on-prem non-retention real where offered; for hosted multi-tenant implement the data controls (tenant isolation ✓, encryption at rest, access-audit, retention/deletion policy, OCR-subprocessor no-train/zero-retention + local-only option) + a data-handling notice | 2 | medium |
 | P6 | A per-claim **defensibility report** (rules fired + tier + citation + the reconciliation check) so a licensed filer validates from the trace alone — strengthens the §1.3 "human decision is theirs" posture *and* the pilot success criteria | 1 + correctness | medium |
 
 (P3 and P6 are the same backend hardening previously paused — now compliance-justified, not optional.)
@@ -218,7 +234,7 @@ throughout. Phased by impact ÷ effort; marked **[build]** (I can do) vs **[you]
 
 ### Phase 1 — Compliance + IP paperwork (fast, mostly non-code; makes the asset shareable & clean)
 - **[build]** In-product P1, P2, P4, P5 (reframe estimate, disclaimers, EULA gate + attestation,
-  local/no-retention notice).
+  data-handling notice — both deployment modes).
 - **[build]** IP pack: `LICENSE`, `THIRD-PARTY-NOTICES`, SBOM, `AI-DISCLOSURE.md`; preserve provenance
   exhibits.
 - **[build]** Draft **templates** (for attorney finalization, not legal advice): EULA + field-of-use,

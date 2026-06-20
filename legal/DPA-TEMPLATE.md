@@ -19,7 +19,7 @@ than performing the service; (b) **sell or share** it; (c) **combine** it with o
 permitted for a service provider; or (d) use it for Provider's own commercial purposes, including
 **training any model**. (Cal. Code Regs. tit. 11 § 7051.)
 
-## 3. **[COMPLIANCE] Default processing posture — local / non-retention**
+## 3. **[COMPLIANCE] Processing posture — local / non-retention default; hosted retention per §3.1**
 The Software is designed to process Customer import/export data **locally / in Customer's environment, and
 NOT to retain it.** Provider's default posture is: compute ephemerally; do not store Customer trade data,
 the generated CATAIR file, or the trace; delete inputs and outputs at session end. Any hosted/server-side
@@ -27,10 +27,14 @@ processing requires Customer's separate written instruction and the EEI provisio
 OCR / extraction** in the hosted offering may use a cloud subprocessor **by default** for scanned documents,
 with an in-tenant **local-only option** — see **Section 7.1**.
 
-> ⚠️ **DRAFT note — reconcile with the multi-tenant model.** The hosted offering **retains** Customer's book
-> of claims (history, audit binder, statutory recordkeeping), so the local/non-retention default above now
-> describes the **local/on-prem deployment**, not the hosted one. Attorney to align Sections 3–4 (and
-> `docs/COMPLIANCE.md`) with the hosted retention posture as the M2–M4 features ship (`docs/BUILD_PLAN.md` §6).
+**3.1 Two deployment modes.** *(a) Local / on-prem* — the non-retention posture above; Provider stores
+nothing. *(b) Hosted (multi-tenant)* — Provider **retains** Customer data to maintain Customer's book of
+claims, claim history, and audit binder (records Customer is required to keep), under the Section 6
+safeguards (**tenant isolation, encryption at rest, access-audit logging**) and a **retention/deletion
+policy** keyed to the statutory clocks and Customer's instructions. In hosted mode the non-retention
+statements above do **not** apply; the controls in Sections 6–8 and 7.1 govern. *(DRAFT — privacy/trade
+counsel to finalize the hosted retention terms; aligns with `docs/COMPLIANCE.md` §2 and `docs/BUILD_PLAN.md`
+§6.)*
 
 ## 4. **[COMPLIANCE] Electronic Export Information (EEI) confidentiality**
 Customer's EEI (e.g., ITN, Schedule B, export values, parties) is **statutorily confidential** (13 U.S.C.
